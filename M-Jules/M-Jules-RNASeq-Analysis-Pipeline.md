@@ -10,6 +10,8 @@ Wed 31, Mar 2021
 -   [Analysis of Data](#analysis-of-data)
     -   [1. Retrieve the data and check the
         quality](#retrieve-the-data-and-check-the-quality)
+    -   [Mapping the reads to the
+        genome](#mapping-the-reads-to-the-genome)
 
 ## Background of Experiment
 
@@ -123,3 +125,72 @@ Below is a look at the quality bars and the adapter content;
 
 <img src="./embedded-images/raw-mean-quality-scores.PNG" style="width:30.0%" alt="Quality scores" />
 <img src="./embedded-images/raw-adapter-content.PNG" style="width:30.0%" alt="Adapter content" />
+
+All the samples have quality score that are above 30, all of them within
+the green zone of the graph, meaning that thay are pretty good. However
+the adapter content within the sample files seems to be high starting at
+around 55bp within the reads. The adpters need to be removed from the
+reads, we use a tool called
+[trimmomatic](https://github.com/timflutre/trimmomatic) to do this. It’s
+not a very recent tool hence its abit slow on large files, but it works
+very well in performing the trimming.
+
+As we have 96 fastq files to clean of adapters, we use a loop command
+once again in a batch script to make use of the cluster resources. After
+the trimming we re-do the fastqc to check that our we have cleaned our
+reads of the adapter sequences.
+
+Continuing within the batch script we had set up initially;
+
+
+    # ======== load trimmomatic tools used for trimming ======================================================
+
+    module load trimmomatic/0.38
+
+    # ============= directory to store output files from trimmomatic =========================================
+
+    trim_out='/var/scratch/waweru/mjules/trimmomatic_out'
+
+    # =========================================================================================================
+    # ============= run trimmomatic ===========================================================================
+    # =========================================================================================================
+
+    for line in $(ls ${raw_data}/S21_23*1.fq.gz) ;\
+    do echo ${line} ;\
+    out_file=$(echo $line |cut -f 8 -d "/" | sed 's/_1.fq.gz//g') ;\
+    echo $out_file ;\
+    trimmomatic PE -threads 4 -trimlog ${trim_out}/mjules_trimmomatic_log_file.txt\
+     -basein ${line} -baseout ${trim_out}/${out_file}_trmd.fq \
+    ILLUMINACLIP:/home/bngina/Bambara/all_adapeters.fa:2:28:4 ;\
+    cd /var/scratch/waweru/mjules/trimmomatic_out/ ;\
+    rm *U.fq ;\
+    done
+
+
+    # ============= re-do the fastqc to check if the adapters have been removed and the sequence length after trimming ========
+    # ==========================================================================================================================
+
+    #=== use fastqc to check the quality of the trimmed fastq files =====
+    #====================================================================
+
+
+    #=========== directories to store results for the trimmed data =========
+    #=======================================================================
+
+    # ========= from fastqc ==========
+
+    fastqc_out='/var/scratch/waweru/mjules/fastqc_out'
+
+    # ========= from multiqc =========
+
+    multiqc_out='/home/bngina/Fellows/mjules/multiqc_out/trmd_data'
+
+We then take a look at the adapter content after trimming;
+
+<img src="./embedded-images/trimmed-quality-scores.PNG" style="width:50.0%" alt="trimmed quality scores" /><img src="./embedded-images/trimmed-adater-content.PNG" style="width:50.0%" alt="trimmed adapter content" />
+
+We see that the quality now for most sequences is closer to 35, and the
+adpter content is les 0.1% in the samples, hence our trimming worked
+well.
+
+### Mapping the reads to the genome
