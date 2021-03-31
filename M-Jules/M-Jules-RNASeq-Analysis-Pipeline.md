@@ -121,6 +121,5 @@ on the cluster.
 
 Below is a look at the quality bars and the adapter content;
 
-<img src="./embedded-images/raw-data-multiqc-table.PNG" style="width:30.0%" alt="Sample statistics" />
-<img src="./embedded-images/raw-mean-quality-scores.PNG" style="width:30.0%" alt="Quality score" />
+<img src="./embedded-images/raw-mean-quality-scores.PNG" style="width:30.0%" alt="Quality scores" />
 <img src="./embedded-images/raw-adapter-content.PNG" style="width:30.0%" alt="Adapter content" />
