@@ -1,0 +1,13 @@
+,files,Number of input reads,Uniquely mapped reads number,% of Uniquely mapped reads,Average mapped length,Number of splices: Total,Number of reads mapped to multiple loci,% of reads mapped to multiple loci,Number of reads unmapped: too many mismatches,% of reads unmapped: too many mismatches,Number of reads unmapped: too short,% of reads unmapped: too short,Number of reads unmapped: other,% of reads unmapped: other,Number of chimeric reads,% of chimeric reads
+1,NASPOT11_1_Log.final.out,21141697,17255501,81.62%,293.64,14654518,2316441,10.96%,0,0.00%,1564679,7.40%,2140,0.01%,0,0.00%
+2,NASPOT11_2_Log.final.out,27258859,23287410,85.43%,294.12,20722260,2238053,8.21%,0,0.00%,1725200,6.33%,3956,0.01%,0,0.00%
+3,NASPOT11_3_Log.final.out,21720163,18127187,83.46%,293.97,15806670,1842312,8.48%,0,0.00%,1745004,8.03%,2557,0.01%,0,0.00%
+4,RESISTO_1_Log.final.out,25971412,21998572,84.70%,294.07,19339725,2111174,8.13%,0,0.00%,1855414,7.14%,2700,0.01%,0,0.00%
+5,RESISTO_2_Log.final.out,20003701,16431822,82.14%,293.97,14440022,1714226,8.57%,0,0.00%,1852858,9.26%,2049,0.01%,0,0.00%
+6,RESISTO_3_Log.final.out,24150807,20443306,84.65%,294.36,18608308,2071531,8.58%,0,0.00%,1630573,6.75%,2170,0.01%,0,0.00%
+7,SPK004_1_Log.final.out,26144718,21610168,82.66%,293.78,18530455,2111200,8.08%,0,0.00%,2418413,9.25%,1792,0.01%,0,0.00%
+8,SPK004_2_Log.final.out,25459250,21672652,85.13%,293.90,18452000,1838037,7.22%,0,0.00%,1943268,7.63%,2037,0.01%,0,0.00%
+9,SPK004_3_Log.final.out,22396139,17197741,76.79%,292.02,14367252,1533763,6.85%,0,0.00%,3660584,16.34%,1640,0.01%,0,0.00%
+10,WAGABOLIGE_1_Log.final.out,21171490,18400369,86.91%,294.24,16414630,1396985,6.60%,0,0.00%,1369821,6.47%,1829,0.01%,0,0.00%
+11,WAGABOLIGE_2_Log.final.out,22530006,19374835,86.00%,294.23,17771933,1486027,6.60%,0,0.00%,1663630,7.38%,2560,0.01%,0,0.00%
+12,WAGABOLIGE_3_Log.final.out,19998075,16999441,85.01%,294.01,15773995,1329344,6.65%,0,0.00%,1664127,8.32%,2377,0.01%,0,0.00%
