@@ -9160,11 +9160,11 @@ Question is, is it necessary to normalize the reads before mapping?
 
 In the *Trinity pipeline* [nature
 protocol](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3875132/), they
-explain that it is important to remove adapter and low quality bases
+explain that it is important to remove adapters and low quality bases
 within the reads, which we did with trimmomatic step. Further they say
-that for sample with more than *200 million* reads, the use may consider
-performing an *in silico* normalization of reads to reduce run-time by
-reducing total numbe rof reads.
+that for samples with more than *200 million* reads, the user may
+consider performing an *in silico* normalization of reads to reduce
+run-time by reducing total number of reads.
 
 Normalization is meant to correct for between and within sample
 differences. Several [algorithms and
@@ -9173,9 +9173,8 @@ are available to perform normalization. Among them is the use if scaling
 factors to account for [composition effects, or a small number of highly
 expressed genes consuming a significant amount of the total
 sequences](https://genomebiology.biomedcentral.com/articles/10.1186/gb-2010-11-12-220#Sec3).
-The
 [DeSeq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
-used size factors to normalize the raw counts to account for differences
+uses size factors to normalize the raw counts to account for differences
 in library depth.
 
 After generating the raw counts table, we will use DeSeq2 to analyse for
