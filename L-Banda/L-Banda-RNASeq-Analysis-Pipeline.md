@@ -1,7 +1,7 @@
 L M RNASeq Data Analysis Pipeline
 ================
 Bernice Waweru
-Tue 06, Apr 2021
+Mon 12, Apr 2021
 
 -   [Background of Experiment](#background-of-experiment)
     -   [Objective](#objective)
@@ -15,6 +15,8 @@ Tue 06, Apr 2021
         -   [Summary of star log files with mapping
             statistics](#summary-of-star-log-files-with-mapping-statistics)
     -   [3. Abundance counting](#abundance-counting)
+    -   [4. Differential Expression Analysis with
+        DESeq2](#differential-expression-analysis-with-deseq2)
 
 ## Background of Experiment
 
@@ -23,7 +25,7 @@ Tue 06, Apr 2021
 The experiment was set-up to evaluate different texture attributes of
 sweetpotato. THe goal is to find whether the differences in texture are
 attributed to either biochemical or genetic factors. To find whether
-there are any genes responsible for the diffences in texture,
+there are any genes responsible for the differences in texture,
 transcriptome sequencing was done on four cultivars of sweetpotato
 
 #### Design
@@ -1231,8 +1233,6 @@ one sample had a lower percentage of 76%, which can be attributed to the
 same sample having a high number of reads that did not map due to having
 too many short reads (16%).
 
-### 3. Abundance counting
+### 3. [Abundance counting](./L-Banda-Abundance-Counting.Rmd)
 
-The next thing we need to do is count how many reads can are assigned to
-each feature (our interest here being genes) found with the samples, i.e
-find the abundance of genes within the samples.
+### 4. [Differential Expression Analysis with DESeq2](./L-Banda-DE-Analysis.Rmd)
