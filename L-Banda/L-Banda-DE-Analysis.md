@@ -1,4 +1,4 @@
-Differential Gene Expression nalysis with DESEq2
+Differential Gene Expression Analysis with DESEq2
 ================
 Bernice Waweru
 Mon 12, Apr 2021

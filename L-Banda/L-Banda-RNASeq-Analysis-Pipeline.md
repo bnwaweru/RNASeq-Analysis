@@ -1233,6 +1233,6 @@ one sample had a lower percentage of 76%, which can be attributed to the
 same sample having a high number of reads that did not map due to having
 too many short reads (16%).
 
-### 3. [Abundance counting](./L-Banda-Abundance-Counting.Rmd)
+### 3. [Abundance counting](https://github.com/bnwaweru/RNASeq-Analysis/blob/main/L-Banda/L-Banda-Abundance-Counting.md)
 
-### 4. [Differential Expression Analysis with DESeq2](./L-Banda-DE-Analysis.Rmd)
+### 4. [Differential Expression Analysis with DESeq2](https://github.com/bnwaweru/RNASeq-Analysis/blob/main/L-Banda/L-Banda-DE-Analysis.md)
