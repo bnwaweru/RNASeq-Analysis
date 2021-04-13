@@ -1081,13 +1081,14 @@ lb <- ggplot(gg, aes(x=sample, y=percentage)) +
   ggtitle("Summary of sample mapping rates with STAR aligner") + guides(fill=guide_legend(title="Mapped read type"))
 
 
-#ggsave(filename = "results/lb_mapping_rates.svg", lb, width = 10, 
- #      height = 8, dpi = 300,device = "svg")
+# ===== save the barplot generated into a png file
+#ggsave(filename = "results/lb_mapping_rates.PNG", lb, width = 10, 
+#      height = 8, dpi = 300,device = "png")
 ```
 
 The above results in the below bar plot.
 
-![mapping\_rates\_stacked\_bar\_plot](embedded-images/lb_mapping_rates.svg)
+![mapping\_rates\_stacked\_bar\_plot](embedded-images/lb_mapping_rates.png)
 
 #### 4. Session information
 
