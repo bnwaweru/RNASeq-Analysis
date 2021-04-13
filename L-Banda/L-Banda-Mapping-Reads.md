@@ -1,12 +1,16 @@
 Mapping reads to a genome
 ================
 Bernice Waweru
-Mon 12, Apr 2021
+Tue 13, Apr 2021
 
 -   [1. Retrieve the genome](#retrieve-the-genome)
 -   [2. Mapping reads to the genome](#mapping-reads-to-the-genome)
+    -   [Index the genome](#index-the-genome)
+    -   [Map the sample reads to the
+        genome](#map-the-sample-reads-to-the-genome)
 -   [3. Summary of star log files with mapping
     statistics](#summary-of-star-log-files-with-mapping-statistics)
+    -   [Mapping stats barplot](#mapping-stats-barplot)
 -   [4. Session information](#session-information)
 
 #### 1. Retrieve the genome
@@ -64,7 +68,7 @@ gives a nice overview of the star mapping algorithm. To use STAR we
 first build an index of the genome, and then map the files in a loop one
 after the other using the cluster resources.
 
-##### 2.1 Index the genome
+##### Index the genome
 
     #============= load tools ======================================
 
@@ -98,7 +102,7 @@ after the other using the cluster resources.
      --sjdbOverhang 148-1 \
      --genomeSAindexNbases 13
 
-##### 2.2 Map the sample reads to the genome
+##### Map the sample reads to the genome
 
 Once the indexing is complete, we move on to map the files within our
 batch script.
@@ -1022,6 +1026,69 @@ one sample had a lower percentage of 76%, which can be attributed to the
 same sample having a high number of reads that did not map due to having
 too many short reads (16%).
 
+##### Mapping stats barplot
+
+``` r
+#=============================================================================#
+#                               mapping stats                                 #
+#=============================================================================#
+
+setwd("C:/Users/BWaweru/OneDrive - CGIAR/Documents/Fellows/Linly_Banda/RWD_Git/RNASeq-Analysis/L-Banda/")
+
+map_stats <- read.csv("results/lb_star_mapping_stats.csv", header = T)
+
+names(map_stats)
+str(map_stats)
+
+# ===== we subset to the columns with percentages to use in plotting, we exclude columns with 0 values
+
+
+gg <- map_stats[,c(2,5,9,13)]
+
+# ===== we replace the % signs with nothing in the dataframe
+
+gg <- data.frame(lapply(gg, function(x) {gsub("%", "", x)}))
+
+# ===== gather the data
+
+gg <- tidyr::gather(gg, key = "mapped_type", value = "percentage", -1)
+
+gg$mapped_type <- factor(gg$mapped_type)
+
+gg$percentage <- as.numeric(gg$percentage)
+
+str(gg)
+
+
+# ===== basic plot
+require(ggplot2)
+require(RColorBrewer)
+
+
+lb <- ggplot(gg, aes(x=sample, y=percentage)) +
+ geom_col(aes(fill=mapped_type)) +
+  geom_text(aes(label=percentage, group=mapped_type), position = position_stack(vjust = 0.5), size=3)+
+    theme_minimal() +
+  xlab("Samples") +
+  theme(panel.grid.major = element_blank(),
+        plot.title = element_text(size=16, hjust = 0.5, face = "plain"),
+        axis.text.y = element_blank(), 
+        axis.text.x = element_text(angle = 90, hjust = 0, size = 10, face = "bold"),
+        axis.title.y = element_blank(),
+        axis.title.x = element_blank(),
+        legend.position = "right", legend.direction="vertical",
+        legend.text = element_text(size=10, face = "italic")) + scale_fill_brewer(palette="Set1") +
+  ggtitle("Summary of sample mapping rates with STAR aligner") + guides(fill=guide_legend(title="Mapped read type"))
+
+
+#ggsave(filename = "results/lb_mapping_rates.svg", lb, width = 10, 
+ #      height = 8, dpi = 300,device = "svg")
+```
+
+The above results in the below bar plot.
+
+![mapping\_rates\_stacked\_bar\_plot](embedded-images/lb_mapping_rates.svg)
+
 #### 4. Session information
 
 Details of packages used for the work flow
@@ -1040,83 +1107,84 @@ devtools::session_info()
     ##  collate  English_United States.1252  
     ##  ctype    English_United States.1252  
     ##  tz       Africa/Nairobi              
-    ##  date     2021-04-12                  
+    ##  date     2021-04-13                  
     ## 
     ## - Packages -------------------------------------------------------------------
-    ##  package     * version date       lib source        
-    ##  assertthat    0.2.1   2019-03-21 [2] CRAN (R 4.0.3)
-    ##  backports     1.2.1   2020-12-09 [2] CRAN (R 4.0.3)
-    ##  broom         0.7.3   2020-12-16 [2] CRAN (R 4.0.3)
-    ##  callr         3.5.1   2020-10-13 [2] CRAN (R 4.0.3)
-    ##  cellranger    1.1.0   2016-07-27 [2] CRAN (R 4.0.3)
-    ##  cli           2.2.0   2020-11-20 [2] CRAN (R 4.0.3)
-    ##  colorspace    2.0-0   2020-11-11 [2] CRAN (R 4.0.3)
-    ##  crayon        1.3.4   2017-09-16 [2] CRAN (R 4.0.3)
-    ##  DBI           1.1.1   2021-01-15 [2] CRAN (R 4.0.3)
-    ##  dbplyr        2.0.0   2020-11-03 [2] CRAN (R 4.0.3)
-    ##  desc          1.2.0   2018-05-01 [2] CRAN (R 4.0.3)
-    ##  devtools      2.3.2   2020-09-18 [2] CRAN (R 4.0.3)
-    ##  digest        0.6.27  2020-10-24 [1] CRAN (R 4.0.3)
-    ##  dplyr       * 1.0.3   2021-01-15 [2] CRAN (R 4.0.3)
-    ##  ellipsis      0.3.1   2020-05-15 [2] CRAN (R 4.0.3)
-    ##  evaluate      0.14    2019-05-28 [2] CRAN (R 4.0.3)
-    ##  fansi         0.4.2   2021-01-15 [2] CRAN (R 4.0.3)
-    ##  forcats     * 0.5.0   2020-03-01 [2] CRAN (R 4.0.3)
-    ##  fs            1.5.0   2020-07-31 [2] CRAN (R 4.0.3)
-    ##  generics      0.1.0   2020-10-31 [2] CRAN (R 4.0.3)
-    ##  ggplot2     * 3.3.3   2020-12-30 [2] CRAN (R 4.0.3)
-    ##  glue          1.4.2   2020-08-27 [2] CRAN (R 4.0.3)
-    ##  gtable        0.3.0   2019-03-25 [2] CRAN (R 4.0.3)
-    ##  haven         2.3.1   2020-06-01 [2] CRAN (R 4.0.3)
-    ##  highr         0.8     2019-03-20 [2] CRAN (R 4.0.3)
-    ##  hms           1.0.0   2021-01-13 [2] CRAN (R 4.0.3)
-    ##  htmltools     0.5.1   2021-01-12 [2] CRAN (R 4.0.3)
-    ##  httr          1.4.2   2020-07-20 [2] CRAN (R 4.0.3)
-    ##  jsonlite      1.7.2   2020-12-09 [2] CRAN (R 4.0.3)
-    ##  kableExtra  * 1.3.1   2020-10-22 [2] CRAN (R 4.0.3)
-    ##  knitr         1.30    2020-09-22 [2] CRAN (R 4.0.3)
-    ##  lifecycle     0.2.0   2020-03-06 [2] CRAN (R 4.0.3)
-    ##  lubridate     1.7.9.2 2020-11-13 [2] CRAN (R 4.0.3)
-    ##  magrittr    * 2.0.1   2020-11-17 [2] CRAN (R 4.0.3)
-    ##  memoise       1.1.0   2017-04-21 [2] CRAN (R 4.0.3)
-    ##  modelr        0.1.8   2020-05-19 [2] CRAN (R 4.0.3)
-    ##  munsell       0.5.0   2018-06-12 [2] CRAN (R 4.0.3)
-    ##  pillar        1.4.7   2020-11-20 [2] CRAN (R 4.0.3)
-    ##  pkgbuild      1.2.0   2020-12-15 [2] CRAN (R 4.0.3)
-    ##  pkgconfig     2.0.3   2019-09-22 [2] CRAN (R 4.0.3)
-    ##  pkgload       1.1.0   2020-05-29 [2] CRAN (R 4.0.3)
-    ##  prettyunits   1.1.1   2020-01-24 [2] CRAN (R 4.0.3)
-    ##  processx      3.4.5   2020-11-30 [2] CRAN (R 4.0.3)
-    ##  ps            1.5.0   2020-12-05 [2] CRAN (R 4.0.3)
-    ##  purrr       * 0.3.4   2020-04-17 [2] CRAN (R 4.0.3)
-    ##  R6            2.5.0   2020-10-28 [2] CRAN (R 4.0.3)
-    ##  Rcpp          1.0.6   2021-01-15 [2] CRAN (R 4.0.3)
-    ##  readr       * 1.4.0   2020-10-05 [2] CRAN (R 4.0.3)
-    ##  readxl        1.3.1   2019-03-13 [2] CRAN (R 4.0.3)
-    ##  remotes       2.2.0   2020-07-21 [2] CRAN (R 4.0.3)
-    ##  reprex        0.3.0   2019-05-16 [2] CRAN (R 4.0.3)
-    ##  rlang         0.4.10  2020-12-30 [2] CRAN (R 4.0.3)
-    ##  rmarkdown     2.6     2020-12-14 [2] CRAN (R 4.0.3)
-    ##  rprojroot     2.0.2   2020-11-15 [2] CRAN (R 4.0.3)
-    ##  rstudioapi    0.13    2020-11-12 [2] CRAN (R 4.0.3)
-    ##  rvest         0.3.6   2020-07-25 [2] CRAN (R 4.0.3)
-    ##  scales        1.1.1   2020-05-11 [2] CRAN (R 4.0.3)
-    ##  sessioninfo   1.1.1   2018-11-05 [2] CRAN (R 4.0.3)
-    ##  stringi       1.5.3   2020-09-09 [2] CRAN (R 4.0.3)
-    ##  stringr     * 1.4.0   2019-02-10 [2] CRAN (R 4.0.3)
-    ##  testthat      3.0.1   2020-12-17 [2] CRAN (R 4.0.3)
-    ##  tibble      * 3.0.5   2021-01-15 [2] CRAN (R 4.0.3)
-    ##  tidyr       * 1.1.2   2020-08-27 [2] CRAN (R 4.0.3)
-    ##  tidyselect    1.1.0   2020-05-11 [2] CRAN (R 4.0.3)
-    ##  tidyverse   * 1.3.0   2019-11-21 [2] CRAN (R 4.0.3)
-    ##  usethis       2.0.0   2020-12-10 [2] CRAN (R 4.0.3)
-    ##  vctrs         0.3.6   2020-12-17 [2] CRAN (R 4.0.3)
-    ##  viridisLite   0.3.0   2018-02-01 [2] CRAN (R 4.0.3)
-    ##  webshot       0.5.2   2019-11-22 [2] CRAN (R 4.0.3)
-    ##  withr         2.4.0   2021-01-16 [2] CRAN (R 4.0.3)
-    ##  xfun          0.20    2021-01-06 [2] CRAN (R 4.0.3)
-    ##  xml2          1.3.2   2020-04-23 [2] CRAN (R 4.0.3)
-    ##  yaml          2.2.1   2020-02-01 [2] CRAN (R 4.0.3)
+    ##  package      * version date       lib source        
+    ##  assertthat     0.2.1   2019-03-21 [2] CRAN (R 4.0.3)
+    ##  backports      1.2.1   2020-12-09 [2] CRAN (R 4.0.3)
+    ##  broom          0.7.3   2020-12-16 [2] CRAN (R 4.0.3)
+    ##  callr          3.5.1   2020-10-13 [2] CRAN (R 4.0.3)
+    ##  cellranger     1.1.0   2016-07-27 [2] CRAN (R 4.0.3)
+    ##  cli            2.2.0   2020-11-20 [2] CRAN (R 4.0.3)
+    ##  colorspace     2.0-0   2020-11-11 [2] CRAN (R 4.0.3)
+    ##  crayon         1.3.4   2017-09-16 [2] CRAN (R 4.0.3)
+    ##  DBI            1.1.1   2021-01-15 [2] CRAN (R 4.0.3)
+    ##  dbplyr         2.0.0   2020-11-03 [2] CRAN (R 4.0.3)
+    ##  desc           1.2.0   2018-05-01 [2] CRAN (R 4.0.3)
+    ##  devtools       2.3.2   2020-09-18 [2] CRAN (R 4.0.3)
+    ##  digest         0.6.27  2020-10-24 [1] CRAN (R 4.0.3)
+    ##  dplyr        * 1.0.3   2021-01-15 [2] CRAN (R 4.0.3)
+    ##  ellipsis       0.3.1   2020-05-15 [2] CRAN (R 4.0.3)
+    ##  evaluate       0.14    2019-05-28 [2] CRAN (R 4.0.3)
+    ##  fansi          0.4.2   2021-01-15 [2] CRAN (R 4.0.3)
+    ##  forcats      * 0.5.0   2020-03-01 [2] CRAN (R 4.0.3)
+    ##  fs             1.5.0   2020-07-31 [2] CRAN (R 4.0.3)
+    ##  generics       0.1.0   2020-10-31 [2] CRAN (R 4.0.3)
+    ##  ggplot2      * 3.3.3   2020-12-30 [2] CRAN (R 4.0.3)
+    ##  glue           1.4.2   2020-08-27 [2] CRAN (R 4.0.3)
+    ##  gtable         0.3.0   2019-03-25 [2] CRAN (R 4.0.3)
+    ##  haven          2.3.1   2020-06-01 [2] CRAN (R 4.0.3)
+    ##  highr          0.8     2019-03-20 [2] CRAN (R 4.0.3)
+    ##  hms            1.0.0   2021-01-13 [2] CRAN (R 4.0.3)
+    ##  htmltools      0.5.1   2021-01-12 [2] CRAN (R 4.0.3)
+    ##  httr           1.4.2   2020-07-20 [2] CRAN (R 4.0.3)
+    ##  jsonlite       1.7.2   2020-12-09 [2] CRAN (R 4.0.3)
+    ##  kableExtra   * 1.3.1   2020-10-22 [2] CRAN (R 4.0.3)
+    ##  knitr          1.30    2020-09-22 [2] CRAN (R 4.0.3)
+    ##  lifecycle      0.2.0   2020-03-06 [2] CRAN (R 4.0.3)
+    ##  lubridate      1.7.9.2 2020-11-13 [2] CRAN (R 4.0.3)
+    ##  magrittr     * 2.0.1   2020-11-17 [2] CRAN (R 4.0.3)
+    ##  memoise        1.1.0   2017-04-21 [2] CRAN (R 4.0.3)
+    ##  modelr         0.1.8   2020-05-19 [2] CRAN (R 4.0.3)
+    ##  munsell        0.5.0   2018-06-12 [2] CRAN (R 4.0.3)
+    ##  pillar         1.4.7   2020-11-20 [2] CRAN (R 4.0.3)
+    ##  pkgbuild       1.2.0   2020-12-15 [2] CRAN (R 4.0.3)
+    ##  pkgconfig      2.0.3   2019-09-22 [2] CRAN (R 4.0.3)
+    ##  pkgload        1.1.0   2020-05-29 [2] CRAN (R 4.0.3)
+    ##  prettyunits    1.1.1   2020-01-24 [2] CRAN (R 4.0.3)
+    ##  processx       3.4.5   2020-11-30 [2] CRAN (R 4.0.3)
+    ##  ps             1.5.0   2020-12-05 [2] CRAN (R 4.0.3)
+    ##  purrr        * 0.3.4   2020-04-17 [2] CRAN (R 4.0.3)
+    ##  R6             2.5.0   2020-10-28 [2] CRAN (R 4.0.3)
+    ##  RColorBrewer * 1.1-2   2014-12-07 [2] CRAN (R 4.0.3)
+    ##  Rcpp           1.0.6   2021-01-15 [2] CRAN (R 4.0.3)
+    ##  readr        * 1.4.0   2020-10-05 [2] CRAN (R 4.0.3)
+    ##  readxl         1.3.1   2019-03-13 [2] CRAN (R 4.0.3)
+    ##  remotes        2.2.0   2020-07-21 [2] CRAN (R 4.0.3)
+    ##  reprex         0.3.0   2019-05-16 [2] CRAN (R 4.0.3)
+    ##  rlang          0.4.10  2020-12-30 [2] CRAN (R 4.0.3)
+    ##  rmarkdown      2.6     2020-12-14 [2] CRAN (R 4.0.3)
+    ##  rprojroot      2.0.2   2020-11-15 [2] CRAN (R 4.0.3)
+    ##  rstudioapi     0.13    2020-11-12 [2] CRAN (R 4.0.3)
+    ##  rvest          0.3.6   2020-07-25 [2] CRAN (R 4.0.3)
+    ##  scales         1.1.1   2020-05-11 [2] CRAN (R 4.0.3)
+    ##  sessioninfo    1.1.1   2018-11-05 [2] CRAN (R 4.0.3)
+    ##  stringi        1.5.3   2020-09-09 [2] CRAN (R 4.0.3)
+    ##  stringr      * 1.4.0   2019-02-10 [2] CRAN (R 4.0.3)
+    ##  testthat       3.0.1   2020-12-17 [2] CRAN (R 4.0.3)
+    ##  tibble       * 3.0.5   2021-01-15 [2] CRAN (R 4.0.3)
+    ##  tidyr        * 1.1.2   2020-08-27 [2] CRAN (R 4.0.3)
+    ##  tidyselect     1.1.0   2020-05-11 [2] CRAN (R 4.0.3)
+    ##  tidyverse    * 1.3.0   2019-11-21 [2] CRAN (R 4.0.3)
+    ##  usethis        2.0.0   2020-12-10 [2] CRAN (R 4.0.3)
+    ##  vctrs          0.3.6   2020-12-17 [2] CRAN (R 4.0.3)
+    ##  viridisLite    0.3.0   2018-02-01 [2] CRAN (R 4.0.3)
+    ##  webshot        0.5.2   2019-11-22 [2] CRAN (R 4.0.3)
+    ##  withr          2.4.0   2021-01-16 [2] CRAN (R 4.0.3)
+    ##  xfun           0.20    2021-01-06 [2] CRAN (R 4.0.3)
+    ##  xml2           1.3.2   2020-04-23 [2] CRAN (R 4.0.3)
+    ##  yaml           2.2.1   2020-02-01 [2] CRAN (R 4.0.3)
     ## 
     ## [1] C:/Users/BWaweru/OneDrive - CGIAR/Documents/R/win-library/4.0
     ## [2] C:/R/R-4.0.3/library
