@@ -1,7 +1,7 @@
 J M RNASeq Data Analysis Pipeline
 ================
 Bernice Waweru
-Thu 08, Apr 2021
+Thu 15, Apr 2021
 
 -   [Background of Experiment](#background-of-experiment)
     -   [Objective](#objective)
@@ -328,14 +328,26 @@ files <- list.files(path, pattern = ".final.out")
 
 # ===== check the files
 
-files # we have 15 files
+files # we have 49 files
 ```
 
-    ##  [1] "S11_10_Log.final.out" "S11_11_Log.final.out" "S11_9_Log.final.out" 
-    ##  [4] "S13_16_Log.final.out" "S13_18_Log.final.out" "S13_19_Log.final.out"
-    ##  [7] "S14_20_Log.final.out" "S14_21_Log.final.out" "S14_22_Log.final.out"
-    ## [10] "S15_2_Log.final.out"  "S15_4_Log.final.out"  "S15_5_Log.final.out" 
-    ## [13] "S16_12_Log.final.out" "S16_6_Log.final.out"  "S16_7_Log.final.out"
+    ##  [1] "S11_10_Log.final.out"  "S11_11_Log.final.out"  "S11_9_Log.final.out"  
+    ##  [4] "S13_16_2Log.final.out" "S13_16_Log.final.out"  "S13_18_Log.final.out" 
+    ##  [7] "S13_19_Log.final.out"  "S14_20_Log.final.out"  "S14_21_Log.final.out" 
+    ## [10] "S14_22_Log.final.out"  "S15_2_Log.final.out"   "S15_4_Log.final.out"  
+    ## [13] "S15_5_Log.final.out"   "S16_12_Log.final.out"  "S16_6_Log.final.out"  
+    ## [16] "S16_7_Log.final.out"   "S17_13_Log.final.out"  "S17_14_Log.final.out" 
+    ## [19] "S17_15_Log.final.out"  "S18_1_Log.final.out"   "S18_3_Log.final.out"  
+    ## [22] "S18_8_Log.final.out"   "S19_10_Log.final.out"  "S19_11_Log.final.out" 
+    ## [25] "S19_9_Log.final.out"   "S20_20_Log.final.out"  "S20_21_Log.final.out" 
+    ## [28] "S20_22_Log.final.out"  "S21_23_Log.final.out"  "S21_25_Log.final.out" 
+    ## [31] "S21_27_Log.final.out"  "S22_23_Log.final.out"  "S22_25_Log.final.out" 
+    ## [34] "S22_27_Log.final.out"  "S25_2_Log.final.out"   "S25_4_Log.final.out"  
+    ## [37] "S25_5_Log.final.out"   "S32_12_Log.final.out"  "S32_6_Log.final.out"  
+    ## [40] "S32_7_Log.final.out"   "S33_13_Log.final.out"  "S33_14_Log.final.out" 
+    ## [43] "S33_15_Log.final.out"  "S34_16_Log.final.out"  "S34_18_Log.final.out" 
+    ## [46] "S34_19_Log.final.out"  "S9_1_Log.final.out"    "S9_3_Log.final.out"   
+    ## [49] "S9_8_Log.final.out"
 
 ``` r
 # ===== function to extract the information we need from the log files
@@ -372,26 +384,60 @@ star_df <- as.data.frame(files)
 star_df # the dataframe with one column of file names
 ```
 
-    ##                   files
-    ## 1  S11_10_Log.final.out
-    ## 2  S11_11_Log.final.out
-    ## 3   S11_9_Log.final.out
-    ## 4  S13_16_Log.final.out
-    ## 5  S13_18_Log.final.out
-    ## 6  S13_19_Log.final.out
-    ## 7  S14_20_Log.final.out
-    ## 8  S14_21_Log.final.out
-    ## 9  S14_22_Log.final.out
-    ## 10  S15_2_Log.final.out
-    ## 11  S15_4_Log.final.out
-    ## 12  S15_5_Log.final.out
-    ## 13 S16_12_Log.final.out
-    ## 14  S16_6_Log.final.out
-    ## 15  S16_7_Log.final.out
+    ##                    files
+    ## 1   S11_10_Log.final.out
+    ## 2   S11_11_Log.final.out
+    ## 3    S11_9_Log.final.out
+    ## 4  S13_16_2Log.final.out
+    ## 5   S13_16_Log.final.out
+    ## 6   S13_18_Log.final.out
+    ## 7   S13_19_Log.final.out
+    ## 8   S14_20_Log.final.out
+    ## 9   S14_21_Log.final.out
+    ## 10  S14_22_Log.final.out
+    ## 11   S15_2_Log.final.out
+    ## 12   S15_4_Log.final.out
+    ## 13   S15_5_Log.final.out
+    ## 14  S16_12_Log.final.out
+    ## 15   S16_6_Log.final.out
+    ## 16   S16_7_Log.final.out
+    ## 17  S17_13_Log.final.out
+    ## 18  S17_14_Log.final.out
+    ## 19  S17_15_Log.final.out
+    ## 20   S18_1_Log.final.out
+    ## 21   S18_3_Log.final.out
+    ## 22   S18_8_Log.final.out
+    ## 23  S19_10_Log.final.out
+    ## 24  S19_11_Log.final.out
+    ## 25   S19_9_Log.final.out
+    ## 26  S20_20_Log.final.out
+    ## 27  S20_21_Log.final.out
+    ## 28  S20_22_Log.final.out
+    ## 29  S21_23_Log.final.out
+    ## 30  S21_25_Log.final.out
+    ## 31  S21_27_Log.final.out
+    ## 32  S22_23_Log.final.out
+    ## 33  S22_25_Log.final.out
+    ## 34  S22_27_Log.final.out
+    ## 35   S25_2_Log.final.out
+    ## 36   S25_4_Log.final.out
+    ## 37   S25_5_Log.final.out
+    ## 38  S32_12_Log.final.out
+    ## 39   S32_6_Log.final.out
+    ## 40   S32_7_Log.final.out
+    ## 41  S33_13_Log.final.out
+    ## 42  S33_14_Log.final.out
+    ## 43  S33_15_Log.final.out
+    ## 44  S34_16_Log.final.out
+    ## 45  S34_18_Log.final.out
+    ## 46  S34_19_Log.final.out
+    ## 47    S9_1_Log.final.out
+    ## 48    S9_3_Log.final.out
+    ## 49    S9_8_Log.final.out
 
 ``` r
 # add to the newly created data frame number of mapped reads
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[1] -> star_df[i, "Number of input reads"]
@@ -399,7 +445,7 @@ for (i in 1:15) {
   
 # add to the newly created data frame number of uniquely mapped reads
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[2] -> star_df[i, "Uniquely mapped reads number"]
@@ -408,7 +454,7 @@ for (i in 1:15) {
 
 # add to the newly created data frame number of uniquely mapped reads
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[3] -> star_df[i, "% of Uniquely mapped reads"]
@@ -416,7 +462,7 @@ for (i in 1:15) {
  
 # add average mapped length
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[4] -> star_df[i, "Average mapped length"]
@@ -424,7 +470,7 @@ for (i in 1:15) {
 
 # add total number of splices
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[5] -> star_df[i, "Number of splices: Total"]
@@ -432,7 +478,7 @@ for (i in 1:15) {
 
 # add Number of reads mapped to multiple loci
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[6] -> star_df[i, "Number of reads mapped to multiple loci"]
@@ -440,7 +486,7 @@ for (i in 1:15) {
 
 # add % of reads mapped to multiple loci
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[7] -> star_df[i, "% of reads mapped to multiple loci"]
@@ -448,7 +494,7 @@ for (i in 1:15) {
 
 # add Number of reads unmapped: too many mismatches
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[8] -> star_df[i, "Number of reads unmapped: too many mismatches"]
@@ -456,7 +502,7 @@ for (i in 1:15) {
 
 # add % of reads unmapped: too many mismatches
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[9] -> star_df[i, "% of reads unmapped: too many mismatches"]
@@ -464,7 +510,7 @@ for (i in 1:15) {
 
 # add Number of reads unmapped: too short
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[10] -> star_df[i, "Number of reads unmapped: too short"]
@@ -472,7 +518,7 @@ for (i in 1:15) {
 
 # add % of reads unmapped: too short
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[11] -> star_df[i, "% of reads unmapped: too short"]
@@ -480,7 +526,7 @@ for (i in 1:15) {
 
 # add Number of reads unmapped: other
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[12] -> star_df[i, "Number of reads unmapped: other"]
@@ -488,7 +534,7 @@ for (i in 1:15) {
 
 # add % of reads unmapped: other
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[13] -> star_df[i, "% of reads unmapped: other"]
@@ -496,7 +542,7 @@ for (i in 1:15) {
 
 # add Number of chimeric reads
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[14] -> star_df[i, "Number of chimeric reads"]
@@ -504,7 +550,7 @@ for (i in 1:15) {
 
 # add % of chimeric reads
 
-for (i in 1:15) {
+for (i in 1:49) {
   file_num <- i
   temp_df <- as.data.frame(results[file_num])
   temp_df$value[15] -> star_df[i, "% of chimeric reads"]
@@ -715,6 +761,56 @@ S11\_9\_Log.final.out
 </td>
 <td style="text-align:left;">
 0.14%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S13\_16\_2Log.final.out
+</td>
+<td style="text-align:left;">
+51183959
+</td>
+<td style="text-align:left;">
+10800056
+</td>
+<td style="text-align:left;">
+21.10%
+</td>
+<td style="text-align:left;">
+286.21
+</td>
+<td style="text-align:left;">
+6686547
+</td>
+<td style="text-align:left;">
+476191
+</td>
+<td style="text-align:left;">
+0.93%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+39904528
+</td>
+<td style="text-align:left;">
+77.96%
+</td>
+<td style="text-align:left;">
+2259
+</td>
+<td style="text-align:left;">
+0.00%
 </td>
 <td style="text-align:left;">
 0
@@ -1315,6 +1411,1656 @@ S16\_7\_Log.final.out
 </td>
 <td style="text-align:left;">
 0.13%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S17\_13\_Log.final.out
+</td>
+<td style="text-align:left;">
+102626835
+</td>
+<td style="text-align:left;">
+31903993
+</td>
+<td style="text-align:left;">
+31.09%
+</td>
+<td style="text-align:left;">
+202.47
+</td>
+<td style="text-align:left;">
+12704113
+</td>
+<td style="text-align:left;">
+1852339
+</td>
+<td style="text-align:left;">
+1.80%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+68799092
+</td>
+<td style="text-align:left;">
+67.04%
+</td>
+<td style="text-align:left;">
+61091
+</td>
+<td style="text-align:left;">
+0.06%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S17\_14\_Log.final.out
+</td>
+<td style="text-align:left;">
+95845860
+</td>
+<td style="text-align:left;">
+30517996
+</td>
+<td style="text-align:left;">
+31.84%
+</td>
+<td style="text-align:left;">
+202.22
+</td>
+<td style="text-align:left;">
+11397355
+</td>
+<td style="text-align:left;">
+2213690
+</td>
+<td style="text-align:left;">
+2.31%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+63035927
+</td>
+<td style="text-align:left;">
+65.77%
+</td>
+<td style="text-align:left;">
+63472
+</td>
+<td style="text-align:left;">
+0.07%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S17\_15\_Log.final.out
+</td>
+<td style="text-align:left;">
+77435744
+</td>
+<td style="text-align:left;">
+23850541
+</td>
+<td style="text-align:left;">
+30.80%
+</td>
+<td style="text-align:left;">
+198.10
+</td>
+<td style="text-align:left;">
+9596374
+</td>
+<td style="text-align:left;">
+1187026
+</td>
+<td style="text-align:left;">
+1.53%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+52345505
+</td>
+<td style="text-align:left;">
+67.60%
+</td>
+<td style="text-align:left;">
+48476
+</td>
+<td style="text-align:left;">
+0.06%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S18\_1\_Log.final.out
+</td>
+<td style="text-align:left;">
+56492555
+</td>
+<td style="text-align:left;">
+28561716
+</td>
+<td style="text-align:left;">
+50.56%
+</td>
+<td style="text-align:left;">
+207.96
+</td>
+<td style="text-align:left;">
+6147289
+</td>
+<td style="text-align:left;">
+3782126
+</td>
+<td style="text-align:left;">
+6.69%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+24009858
+</td>
+<td style="text-align:left;">
+42.50%
+</td>
+<td style="text-align:left;">
+90198
+</td>
+<td style="text-align:left;">
+0.16%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S18\_3\_Log.final.out
+</td>
+<td style="text-align:left;">
+66976762
+</td>
+<td style="text-align:left;">
+33580821
+</td>
+<td style="text-align:left;">
+50.14%
+</td>
+<td style="text-align:left;">
+206.13
+</td>
+<td style="text-align:left;">
+7185002
+</td>
+<td style="text-align:left;">
+4480112
+</td>
+<td style="text-align:left;">
+6.69%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+28700390
+</td>
+<td style="text-align:left;">
+42.85%
+</td>
+<td style="text-align:left;">
+153578
+</td>
+<td style="text-align:left;">
+0.23%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S18\_8\_Log.final.out
+</td>
+<td style="text-align:left;">
+67822648
+</td>
+<td style="text-align:left;">
+34307447
+</td>
+<td style="text-align:left;">
+50.58%
+</td>
+<td style="text-align:left;">
+212.51
+</td>
+<td style="text-align:left;">
+6958285
+</td>
+<td style="text-align:left;">
+4827855
+</td>
+<td style="text-align:left;">
+7.12%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+28479228
+</td>
+<td style="text-align:left;">
+41.99%
+</td>
+<td style="text-align:left;">
+142640
+</td>
+<td style="text-align:left;">
+0.21%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S19\_10\_Log.final.out
+</td>
+<td style="text-align:left;">
+74283249
+</td>
+<td style="text-align:left;">
+37463505
+</td>
+<td style="text-align:left;">
+50.43%
+</td>
+<td style="text-align:left;">
+204.44
+</td>
+<td style="text-align:left;">
+8251296
+</td>
+<td style="text-align:left;">
+5005539
+</td>
+<td style="text-align:left;">
+6.74%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+31581651
+</td>
+<td style="text-align:left;">
+42.52%
+</td>
+<td style="text-align:left;">
+163312
+</td>
+<td style="text-align:left;">
+0.22%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S19\_11\_Log.final.out
+</td>
+<td style="text-align:left;">
+58428123
+</td>
+<td style="text-align:left;">
+28691140
+</td>
+<td style="text-align:left;">
+49.11%
+</td>
+<td style="text-align:left;">
+211.01
+</td>
+<td style="text-align:left;">
+5863015
+</td>
+<td style="text-align:left;">
+4092048
+</td>
+<td style="text-align:left;">
+7.00%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+25484891
+</td>
+<td style="text-align:left;">
+43.62%
+</td>
+<td style="text-align:left;">
+108223
+</td>
+<td style="text-align:left;">
+0.19%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S19\_9\_Log.final.out
+</td>
+<td style="text-align:left;">
+75260217
+</td>
+<td style="text-align:left;">
+38686104
+</td>
+<td style="text-align:left;">
+51.40%
+</td>
+<td style="text-align:left;">
+206.08
+</td>
+<td style="text-align:left;">
+4379354
+</td>
+<td style="text-align:left;">
+7733983
+</td>
+<td style="text-align:left;">
+10.28%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+28654249
+</td>
+<td style="text-align:left;">
+38.07%
+</td>
+<td style="text-align:left;">
+111223
+</td>
+<td style="text-align:left;">
+0.15%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S20\_20\_Log.final.out
+</td>
+<td style="text-align:left;">
+104034471
+</td>
+<td style="text-align:left;">
+52830415
+</td>
+<td style="text-align:left;">
+50.78%
+</td>
+<td style="text-align:left;">
+212.74
+</td>
+<td style="text-align:left;">
+12569245
+</td>
+<td style="text-align:left;">
+6801750
+</td>
+<td style="text-align:left;">
+6.54%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+44133089
+</td>
+<td style="text-align:left;">
+42.42%
+</td>
+<td style="text-align:left;">
+181759
+</td>
+<td style="text-align:left;">
+0.17%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S20\_21\_Log.final.out
+</td>
+<td style="text-align:left;">
+181827728
+</td>
+<td style="text-align:left;">
+88708050
+</td>
+<td style="text-align:left;">
+48.79%
+</td>
+<td style="text-align:left;">
+203.35
+</td>
+<td style="text-align:left;">
+17288506
+</td>
+<td style="text-align:left;">
+12523623
+</td>
+<td style="text-align:left;">
+6.89%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+79909675
+</td>
+<td style="text-align:left;">
+43.95%
+</td>
+<td style="text-align:left;">
+491005
+</td>
+<td style="text-align:left;">
+0.27%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S20\_22\_Log.final.out
+</td>
+<td style="text-align:left;">
+135944926
+</td>
+<td style="text-align:left;">
+76121556
+</td>
+<td style="text-align:left;">
+55.99%
+</td>
+<td style="text-align:left;">
+196.42
+</td>
+<td style="text-align:left;">
+27213763
+</td>
+<td style="text-align:left;">
+5397948
+</td>
+<td style="text-align:left;">
+3.97%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+54220477
+</td>
+<td style="text-align:left;">
+39.88%
+</td>
+<td style="text-align:left;">
+190952
+</td>
+<td style="text-align:left;">
+0.14%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S21\_23\_Log.final.out
+</td>
+<td style="text-align:left;">
+34456970
+</td>
+<td style="text-align:left;">
+18266196
+</td>
+<td style="text-align:left;">
+53.01%
+</td>
+<td style="text-align:left;">
+283.35
+</td>
+<td style="text-align:left;">
+11849860
+</td>
+<td style="text-align:left;">
+886817
+</td>
+<td style="text-align:left;">
+2.57%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+15295507
+</td>
+<td style="text-align:left;">
+44.39%
+</td>
+<td style="text-align:left;">
+6448
+</td>
+<td style="text-align:left;">
+0.02%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S21\_25\_Log.final.out
+</td>
+<td style="text-align:left;">
+116192366
+</td>
+<td style="text-align:left;">
+64880071
+</td>
+<td style="text-align:left;">
+55.84%
+</td>
+<td style="text-align:left;">
+193.24
+</td>
+<td style="text-align:left;">
+19167704
+</td>
+<td style="text-align:left;">
+6692621
+</td>
+<td style="text-align:left;">
+5.76%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+44340576
+</td>
+<td style="text-align:left;">
+38.16%
+</td>
+<td style="text-align:left;">
+232395
+</td>
+<td style="text-align:left;">
+0.20%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S21\_27\_Log.final.out
+</td>
+<td style="text-align:left;">
+93789193
+</td>
+<td style="text-align:left;">
+45016699
+</td>
+<td style="text-align:left;">
+48.00%
+</td>
+<td style="text-align:left;">
+186.54
+</td>
+<td style="text-align:left;">
+15056786
+</td>
+<td style="text-align:left;">
+3190278
+</td>
+<td style="text-align:left;">
+3.40%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+45358492
+</td>
+<td style="text-align:left;">
+48.36%
+</td>
+<td style="text-align:left;">
+211383
+</td>
+<td style="text-align:left;">
+0.23%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S22\_23\_Log.final.out
+</td>
+<td style="text-align:left;">
+167174347
+</td>
+<td style="text-align:left;">
+46816895
+</td>
+<td style="text-align:left;">
+28.00%
+</td>
+<td style="text-align:left;">
+188.37
+</td>
+<td style="text-align:left;">
+19105616
+</td>
+<td style="text-align:left;">
+2089096
+</td>
+<td style="text-align:left;">
+1.25%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+118087295
+</td>
+<td style="text-align:left;">
+70.64%
+</td>
+<td style="text-align:left;">
+172292
+</td>
+<td style="text-align:left;">
+0.10%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S22\_25\_Log.final.out
+</td>
+<td style="text-align:left;">
+135087683
+</td>
+<td style="text-align:left;">
+27619279
+</td>
+<td style="text-align:left;">
+20.45%
+</td>
+<td style="text-align:left;">
+198.48
+</td>
+<td style="text-align:left;">
+12203682
+</td>
+<td style="text-align:left;">
+1155397
+</td>
+<td style="text-align:left;">
+0.86%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+106213446
+</td>
+<td style="text-align:left;">
+78.63%
+</td>
+<td style="text-align:left;">
+94744
+</td>
+<td style="text-align:left;">
+0.07%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S22\_27\_Log.final.out
+</td>
+<td style="text-align:left;">
+157580397
+</td>
+<td style="text-align:left;">
+100456306
+</td>
+<td style="text-align:left;">
+63.75%
+</td>
+<td style="text-align:left;">
+183.24
+</td>
+<td style="text-align:left;">
+31445813
+</td>
+<td style="text-align:left;">
+8150190
+</td>
+<td style="text-align:left;">
+5.17%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+48697318
+</td>
+<td style="text-align:left;">
+30.90%
+</td>
+<td style="text-align:left;">
+260597
+</td>
+<td style="text-align:left;">
+0.17%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S25\_2\_Log.final.out
+</td>
+<td style="text-align:left;">
+73471513
+</td>
+<td style="text-align:left;">
+40262774
+</td>
+<td style="text-align:left;">
+54.80%
+</td>
+<td style="text-align:left;">
+180.92
+</td>
+<td style="text-align:left;">
+15070714
+</td>
+<td style="text-align:left;">
+2720218
+</td>
+<td style="text-align:left;">
+3.70%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+30391542
+</td>
+<td style="text-align:left;">
+41.37%
+</td>
+<td style="text-align:left;">
+86487
+</td>
+<td style="text-align:left;">
+0.12%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S25\_4\_Log.final.out
+</td>
+<td style="text-align:left;">
+84266260
+</td>
+<td style="text-align:left;">
+44347930
+</td>
+<td style="text-align:left;">
+52.63%
+</td>
+<td style="text-align:left;">
+195.04
+</td>
+<td style="text-align:left;">
+8155428
+</td>
+<td style="text-align:left;">
+8249571
+</td>
+<td style="text-align:left;">
+9.79%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+31497911
+</td>
+<td style="text-align:left;">
+37.38%
+</td>
+<td style="text-align:left;">
+107600
+</td>
+<td style="text-align:left;">
+0.13%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S25\_5\_Log.final.out
+</td>
+<td style="text-align:left;">
+170622724
+</td>
+<td style="text-align:left;">
+86027427
+</td>
+<td style="text-align:left;">
+50.42%
+</td>
+<td style="text-align:left;">
+192.35
+</td>
+<td style="text-align:left;">
+4605447
+</td>
+<td style="text-align:left;">
+22600418
+</td>
+<td style="text-align:left;">
+13.25%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+61638121
+</td>
+<td style="text-align:left;">
+36.13%
+</td>
+<td style="text-align:left;">
+219823
+</td>
+<td style="text-align:left;">
+0.13%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S32\_12\_Log.final.out
+</td>
+<td style="text-align:left;">
+171115819
+</td>
+<td style="text-align:left;">
+80976376
+</td>
+<td style="text-align:left;">
+47.32%
+</td>
+<td style="text-align:left;">
+177.98
+</td>
+<td style="text-align:left;">
+2191561
+</td>
+<td style="text-align:left;">
+26600383
+</td>
+<td style="text-align:left;">
+15.55%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+62845688
+</td>
+<td style="text-align:left;">
+36.73%
+</td>
+<td style="text-align:left;">
+464950
+</td>
+<td style="text-align:left;">
+0.27%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S32\_6\_Log.final.out
+</td>
+<td style="text-align:left;">
+97335454
+</td>
+<td style="text-align:left;">
+50994644
+</td>
+<td style="text-align:left;">
+52.39%
+</td>
+<td style="text-align:left;">
+198.19
+</td>
+<td style="text-align:left;">
+5972505
+</td>
+<td style="text-align:left;">
+10818147
+</td>
+<td style="text-align:left;">
+11.11%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+35372656
+</td>
+<td style="text-align:left;">
+36.34%
+</td>
+<td style="text-align:left;">
+89392
+</td>
+<td style="text-align:left;">
+0.09%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S32\_7\_Log.final.out
+</td>
+<td style="text-align:left;">
+183507226
+</td>
+<td style="text-align:left;">
+92017796
+</td>
+<td style="text-align:left;">
+50.14%
+</td>
+<td style="text-align:left;">
+196.46
+</td>
+<td style="text-align:left;">
+6374574
+</td>
+<td style="text-align:left;">
+22179509
+</td>
+<td style="text-align:left;">
+12.09%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+68909844
+</td>
+<td style="text-align:left;">
+37.55%
+</td>
+<td style="text-align:left;">
+188615
+</td>
+<td style="text-align:left;">
+0.10%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S33\_13\_Log.final.out
+</td>
+<td style="text-align:left;">
+178021560
+</td>
+<td style="text-align:left;">
+87960863
+</td>
+<td style="text-align:left;">
+49.41%
+</td>
+<td style="text-align:left;">
+203.82
+</td>
+<td style="text-align:left;">
+1729178
+</td>
+<td style="text-align:left;">
+23878429
+</td>
+<td style="text-align:left;">
+13.41%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+65924033
+</td>
+<td style="text-align:left;">
+37.03%
+</td>
+<td style="text-align:left;">
+175010
+</td>
+<td style="text-align:left;">
+0.10%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S33\_14\_Log.final.out
+</td>
+<td style="text-align:left;">
+217361834
+</td>
+<td style="text-align:left;">
+106318221
+</td>
+<td style="text-align:left;">
+48.91%
+</td>
+<td style="text-align:left;">
+190.15
+</td>
+<td style="text-align:left;">
+3677410
+</td>
+<td style="text-align:left;">
+30988799
+</td>
+<td style="text-align:left;">
+14.26%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+79608685
+</td>
+<td style="text-align:left;">
+36.62%
+</td>
+<td style="text-align:left;">
+305288
+</td>
+<td style="text-align:left;">
+0.14%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S33\_15\_Log.final.out
+</td>
+<td style="text-align:left;">
+115098061
+</td>
+<td style="text-align:left;">
+55400434
+</td>
+<td style="text-align:left;">
+48.13%
+</td>
+<td style="text-align:left;">
+271.82
+</td>
+<td style="text-align:left;">
+1893496
+</td>
+<td style="text-align:left;">
+9328893
+</td>
+<td style="text-align:left;">
+8.11%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+50364398
+</td>
+<td style="text-align:left;">
+43.76%
+</td>
+<td style="text-align:left;">
+384
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S34\_16\_Log.final.out
+</td>
+<td style="text-align:left;">
+97287955
+</td>
+<td style="text-align:left;">
+45213373
+</td>
+<td style="text-align:left;">
+46.47%
+</td>
+<td style="text-align:left;">
+270.64
+</td>
+<td style="text-align:left;">
+2003686
+</td>
+<td style="text-align:left;">
+7704062
+</td>
+<td style="text-align:left;">
+7.92%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+44366907
+</td>
+<td style="text-align:left;">
+45.60%
+</td>
+<td style="text-align:left;">
+648
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S34\_18\_Log.final.out
+</td>
+<td style="text-align:left;">
+52324945
+</td>
+<td style="text-align:left;">
+27138037
+</td>
+<td style="text-align:left;">
+51.86%
+</td>
+<td style="text-align:left;">
+274.94
+</td>
+<td style="text-align:left;">
+593286
+</td>
+<td style="text-align:left;">
+4877041
+</td>
+<td style="text-align:left;">
+9.32%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+20305593
+</td>
+<td style="text-align:left;">
+38.81%
+</td>
+<td style="text-align:left;">
+271
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S34\_19\_Log.final.out
+</td>
+<td style="text-align:left;">
+55332003
+</td>
+<td style="text-align:left;">
+24084240
+</td>
+<td style="text-align:left;">
+43.53%
+</td>
+<td style="text-align:left;">
+270.47
+</td>
+<td style="text-align:left;">
+1092044
+</td>
+<td style="text-align:left;">
+4328609
+</td>
+<td style="text-align:left;">
+7.82%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+26916349
+</td>
+<td style="text-align:left;">
+48.65%
+</td>
+<td style="text-align:left;">
+391
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S9\_1\_Log.final.out
+</td>
+<td style="text-align:left;">
+39701715
+</td>
+<td style="text-align:left;">
+10272034
+</td>
+<td style="text-align:left;">
+25.87%
+</td>
+<td style="text-align:left;">
+285.30
+</td>
+<td style="text-align:left;">
+6855332
+</td>
+<td style="text-align:left;">
+397447
+</td>
+<td style="text-align:left;">
+1.00%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+29029032
+</td>
+<td style="text-align:left;">
+73.12%
+</td>
+<td style="text-align:left;">
+2463
+</td>
+<td style="text-align:left;">
+0.01%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S9\_3\_Log.final.out
+</td>
+<td style="text-align:left;">
+61688435
+</td>
+<td style="text-align:left;">
+15932374
+</td>
+<td style="text-align:left;">
+25.83%
+</td>
+<td style="text-align:left;">
+285.85
+</td>
+<td style="text-align:left;">
+10568093
+</td>
+<td style="text-align:left;">
+606352
+</td>
+<td style="text-align:left;">
+0.98%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+45145493
+</td>
+<td style="text-align:left;">
+73.18%
+</td>
+<td style="text-align:left;">
+3521
+</td>
+<td style="text-align:left;">
+0.01%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+S9\_8\_Log.final.out
+</td>
+<td style="text-align:left;">
+69159187
+</td>
+<td style="text-align:left;">
+17729300
+</td>
+<td style="text-align:left;">
+25.64%
+</td>
+<td style="text-align:left;">
+286.26
+</td>
+<td style="text-align:left;">
+12278546
+</td>
+<td style="text-align:left;">
+664724
+</td>
+<td style="text-align:left;">
+0.96%
+</td>
+<td style="text-align:left;">
+0
+</td>
+<td style="text-align:left;">
+0.00%
+</td>
+<td style="text-align:left;">
+50759784
+</td>
+<td style="text-align:left;">
+73.40%
+</td>
+<td style="text-align:left;">
+4207
+</td>
+<td style="text-align:left;">
+0.01%
 </td>
 <td style="text-align:left;">
 0
