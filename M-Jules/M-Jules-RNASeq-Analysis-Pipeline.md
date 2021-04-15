@@ -3079,10 +3079,73 @@ S9\_8\_Log.final.out
 ```
 
 Looking at the results, we observe that many of the samples had very low
-percentages of reads uniquely mapping to on e location on the genome.
-But we also observe that a lot of these reads were not mapped because
-they were too short. Maybe there is parameter we can add to instruct
-star to also use the short reads?
+percentages of reads uniquely mapping to one location on the genome. But
+we also observe that a lot of these reads were not mapped because they
+were too short. Maybe there is parameter we can add to instruct star to
+also use the short reads?
+
+Lets have a better visual look those numbers in a bar plot.
+
+##### Mapping stats barplot
+
+``` r
+#=============================================================================#
+#                               mapping stats                                 #
+#=============================================================================#
+
+setwd("C:/Users/BWaweru/OneDrive - CGIAR/Documents/Fellows/Jules_Mutabazi/RWD_Git/RNASeq-Analysis/M-Jules/")
+
+map_stats <- read.csv("results/jm_star_mapping_stats.csv", header = T)
+
+names(map_stats)
+str(map_stats)
+
+# ===== we subset to the columns with percentages to use in plotting, we exclude columns with 0 values
+
+
+gg <- map_stats[,c(2,5,9,13)]
+
+# ===== we replace the % signs with nothing in the dataframe
+
+gg <- data.frame(lapply(gg, function(x) {gsub("%", "", x)}))
+
+# ===== gather the data
+
+gg <- tidyr::gather(gg, key = "mapped_type", value = "percentage", -1)
+
+gg$mapped_type <- factor(gg$mapped_type)
+
+gg$percentage <- as.numeric(gg$percentage)
+
+str(gg)
+
+
+# ===== basic plot
+require(ggplot2)
+require(RColorBrewer)
+
+
+jm <- ggplot(gg, aes(x=sample, y=percentage)) +
+ geom_col(aes(fill=mapped_type)) +
+    theme_minimal() +
+  xlab("Samples") +
+  theme(panel.grid.major = element_blank(),
+        plot.title = element_text(size=16, hjust = 0.5, face = "plain"),
+        axis.text.x = element_text(angle = 90, hjust = 0, size = 10, face = "bold"),
+        axis.title.x = element_blank(),
+        legend.position = "right", legend.direction="vertical",
+        legend.text = element_text(size=10, face = "italic")) + scale_fill_brewer(palette="Set1") +
+  ggtitle("Summary of sample mapping rates with STAR aligner") + guides(fill=guide_legend(title="Mapped read type"))
+
+
+# ===== save the barplot generated into a png file
+#ggsave(filename = "results/jm_mapping_rates.PNG", jm, width = 10, 
+#     height = 8, dpi = 300,device = "png")
+```
+
+The above results in the below bar plot.
+
+![mapping\_rates\_stacked\_bar\_plot](embedded-images/jm_mapping_rates.PNG)
 
 From the [star
 manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf),
@@ -10883,7 +10946,7 @@ S9\_8\_trim\_paired\_dedup\_norm
 </table>
 
 First thing we notice is that the total number of reads is way lower
-thamn what we have for our files. With the previous pipeline, the reads
+than what we have for our files. With the previous pipeline, the reads
 files were first *de-deduplicated* and then *normalised* before the
 mapping step. This is probably why such a huge number of reads were lost
 before even going to the mapping step.
@@ -10894,7 +10957,7 @@ reads, before mapping, about *40,466,546* reads were uniquely mapped to
 the genome out of a total of *148,198,381* total read that were taken as
 input for the sample.
 
-With de-duplication and normaisation for the same sample, only
+With de-duplication and normalization for the same sample, only
 *6,455,030* reads mapped out of a total *8,463,694* reads that were
 taken as input.
 
