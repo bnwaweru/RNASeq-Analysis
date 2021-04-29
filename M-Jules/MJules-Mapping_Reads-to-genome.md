@@ -1,12 +1,22 @@
 Mapping reads to a genome
 ================
 Bernice Waweru
-Thu 29, Apr 2021
+Fri 30, Apr 2021
 
--   [Summary of star log files with mapping
-    statistics](#summary-of-star-log-files-with-mapping-statistics)
-    -   [Mapping stats barplot](#mapping-stats-barplot)
-    -   [April 21st 2021](#april-21st-2021)
+-   [1. Index the genome with STAR](#1-index-the-genome-with-star)
+-   [2. Map the reads to the Indexed
+    genome](#2-map-the-reads-to-the-indexed-genome)
+-   [3. Summary of star log files with mapping
+    statistics](#3-summary-of-star-log-files-with-mapping-statistics)
+    -   [Mapping rates statistics
+        barplot](#mapping-rates-statistics-barplot)
+-   [4. Troubleshooting *Low mapping
+    rates*](#4-troubleshooting-low-mapping-rates)
+    -   [4.1 Tweaking Alingment
+        parameters](#41-tweaking-alingment-parameters)
+        -   [April 21 2021](#april-21-2021)
+        -   [April 28 2021](#april-28-2021)
+    -   [4.2 Seeking a better genome](#42-seeking-a-better-genome)
 
 Several mapping algorithms/tools are available for mapping RNASeq reads
 to a genome. It is however important to use an aligner that is able
@@ -25,9 +35,12 @@ aligner where the transcripts are located on the genome.
 
 [This
 page](https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/03_alignment.html)
-gives a nice overview of the star mapping algorithm. To use STAR we
-first build an index of the genome, and then map the files in a loop one
-after the other using the cluster resources.
+gives a nice overview of the star mapping algorithm.
+
+### 1. Index the genome with STAR
+
+To use STAR we first build an index of the genome, and then map the
+files in a loop one after the other using the cluster resources.
 
     #!/bin/bash
     #SBATCH -p batch
@@ -75,6 +88,8 @@ after the other using the cluster resources.
      --sjdbGTFfile Bruz_v2.gff3 \
      --sjdbOverhang 100
 
+### 2. Map the reads to the Indexed genome
+
 Once the indexing is complete, we move on to map the files within our
 batch script.
 
@@ -119,7 +134,7 @@ files from the cluster and store them on out computers, then process the
 files within R to extract the information about how well our samples
 mapped to the genome.
 
-#### Summary of star log files with mapping statistics
+### 3. Summary of star log files with mapping statistics
 
 ``` r
 setwd("C:/Users/BWaweru/OneDrive - CGIAR/Documents/Fellows/Jules_Mutabazi/RWD_Git/RNASeq-Analysis/M-Jules/")
@@ -2900,7 +2915,7 @@ also use the short reads?
 
 Lets have a better visual look those numbers in a bar plot.
 
-##### Mapping stats barplot
+##### Mapping rates statistics barplot
 
 ``` r
 #=============================================================================#
@@ -2959,6 +2974,8 @@ jm <- ggplot(gg, aes(x=sample, y=percentage)) +
 The above results in the below bar plot.
 
 ![mapping\_rates\_stacked\_bar\_plot](embedded-images/jm_mapping_rates.PNG)
+
+### 4. Troubleshooting *Low mapping rates*
 
 From the [star
 manual](https://github.com/alexdobin/STAR/blob/master/doc/STARmanual.pdf),
@@ -10806,7 +10823,9 @@ Still of concern however is the fact that out of the total number of
 reads we have, a small percentage of them are uniquely mapped to the
 genome we are using.
 
-##### April 21st 2021
+#### 4.1 Tweaking Alingment parameters
+
+##### April 21 2021
 
 Reading further the manual to look for parameters that can be adjusted
 to improve the mapping, we find the parameter `--peOverlapNbasesMin`
@@ -10818,3 +10837,105 @@ mates. Star will search for an overlap between mates larger or equal to
 overlap area not exceeding `--peOverlapMMp`. This feature was developed
 in collaboration with Illumina Inc. Will add this parameters to our
 mapping commands and evaluate if it improves the mapping rates.
+
+We tested this on sample S16\_13 that had the lowest mapping rates.
+
+After adding this parameters to the command, the mapping rates did not
+improve at all.
+
+##### April 28 2021
+
+We also tried to look into online pages to find whether others using
+STAR as an alignment tool for RNASeq data have experienced the same
+challenges. There is an active google groups where the developer answers
+quite promptly, and the problem of too many unmapped reads due to short
+length is common. There is a discussion thread on this topic
+[here](https://groups.google.com/g/rna-star/c/VS3wiSciQtg?pli=1).
+
+There are various suggestions from the group. Among them are a few to
+tweak the parameters that control the output, and to also output the
+unmapped reads so we can blast these and see of they are contaminants.
+
+Again we tested this on sample S13\_16 with the below command. For
+`--outFilterScoreMinOverLread` and `--outFilterMatchNminOverLread` the
+default values are 0.66, and here we reduce them to 0.33. We also output
+the unmapped reads.
+
+    for R1 in ${fastq_dir}/S13_16*trmd_1P.fq ;\
+    do echo ${R1};\
+    R2=$(echo ${R1} | sed 's/trmd_1P.fq/trmd_2P.fq/g');\
+    echo ${R2};\
+    out_name=$(echo ${R1} | cut -f 7 -d "/" | sed 's/trmd_1P.fq//g');\
+    echo ${out_name};\
+    STAR --runThreadN 10\
+     --peOverlapNbasesMin 10 \
+     --peOverlapMMp 0.01 \
+     --genomeDir ${geno_dir}\
+     --readFilesIn ${R1} ${R2}\
+     --outFileNamePrefix ${out_name}pe-ovelap-10_\
+     --outSAMtype BAM SortedByCoordinate\
+     --outBAMsortingThreadN 1 \
+     --outFilterScoreMinOverLread 0.33 --outFilterMatchNminOverLread 0.33 \
+     --outReadsUnmapped Fastx ;\
+    done
+
+With the above we see slightly higher unique mapping rates, but not
+significantly.
+
+     Mapping speed, Million of reads per hour |       3.44
+
+                              Number of input reads |       51183959
+                          Average input read length |       294
+                                        UNIQUE READS:
+                       Uniquely mapped reads number |       12839359
+                            Uniquely mapped reads % |       25.08%
+                              Average mapped length |       262.08
+                           Number of splices: Total |       7520551
+                Number of splices: Annotated (sjdb) |       0
+                           Number of splices: GT/AG |       7067140
+                           Number of splices: GC/AG |       97330
+                           Number of splices: AT/AC |       2345
+                   Number of splices: Non-canonical |       353736
+                          Mismatch rate per base, % |       1.10%
+                             Deletion rate per base |       0.04%
+                            Deletion average length |       1.36
+                            Insertion rate per base |       0.07%
+                           Insertion average length |       2.28
+                                 MULTI-MAPPING READS:
+            Number of reads mapped to multiple loci |       1010813
+                 % of reads mapped to multiple loci |       1.97%
+            Number of reads mapped to too many loci |       81298
+                 % of reads mapped to too many loci |       0.16%
+                                      UNMAPPED READS:
+      Number of reads unmapped: too many mismatches |       1753397
+           % of reads unmapped: too many mismatches |       3.43%
+                Number of reads unmapped: too short |       35498906
+                     % of reads unmapped: too short |       69.36%
+                    Number of reads unmapped: other |       186
+                         % of reads unmapped: other |       0.00%
+                                      CHIMERIC READS:
+                           Number of chimeric reads |       0
+                                % of chimeric reads |       0.00%
+
+We still have a lot reads that are not being mapped. We need to be able
+to get most of our reads mapped so we can get the most out of the data.
+
+#### 4.2 Seeking a better genome
+
+The genome we have been making use of is at scoffold level, with quite a
+number of scaffolds. The genome is for Congo grass *Urochloa
+ruziziensis*, same genus of the grasses we are working with.
+
+Recently, a chromosome scale assembly was published by the team at
+[Embrapa](https://www.ncbi.nlm.nih.gov/genome/44764?genome_assembly_id=1493280).
+The genome assembly is available for download as a fasta file, however
+there is no genome annotation file available. The annotation file is
+required by star to map the reads to the genome.
+
+What we can try to do is to transfer the annotation from the scaffolded
+genome to the chromosome scale genome. The main idea is to transfer the
+annotations (genome features from the Earlham genome from De Vega) to
+the full scale genome from the Embrapa team using command line tools
+like [RATT](https://github.com/ThomasDOtto/ratt). If successful we will
+re-do the mapping and maybe this might improve the mapping rates as the
+Embrapa genome is of a higher resolution.
