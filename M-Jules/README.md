@@ -12,6 +12,7 @@ Thu 29, Apr 2021
         quality](#1-retrieve-the-data-and-check-the-quality)
     -   [2. Mapping the reads to the
         genome](#2-mapping-the-reads-to-the-genome)
+-   [Session information](#session-information)
 
 ## Background of Experiment
 
@@ -62,4 +63,34 @@ will follow a genome-guided approach to in analyzing our data.
 
 ### 1. [Retrieve the data and check the quality](https://github.com/bnwaweru/RNASeq-Analysis/blob/main/M-Jules/MJules-Data-Quality.md)
 
-### 2. [Mapping the reads to the genome](https://github.com/bnwaweru/RNASeq-Analysis/blob/main/M-Jules/M-Jules-RNASeq-Analysis-Pipeline.md)
+### 2. [Mapping the reads to the genome](https://github.com/bnwaweru/RNASeq-Analysis/blob/main/M-Jules/MJules-Mapping_Reads-to-genome.md)
+
+## Session information
+
+Details of the packages used within the pipeline
+
+``` r
+sessionInfo()
+```
+
+    ## R version 4.0.3 (2020-10-10)
+    ## Platform: x86_64-w64-mingw32/x64 (64-bit)
+    ## Running under: Windows 10 x64 (build 18363)
+    ## 
+    ## Matrix products: default
+    ## 
+    ## locale:
+    ## [1] LC_COLLATE=English_United States.1252 
+    ## [2] LC_CTYPE=English_United States.1252   
+    ## [3] LC_MONETARY=English_United States.1252
+    ## [4] LC_NUMERIC=C                          
+    ## [5] LC_TIME=English_United States.1252    
+    ## 
+    ## attached base packages:
+    ## [1] stats     graphics  grDevices utils     datasets  methods   base     
+    ## 
+    ## loaded via a namespace (and not attached):
+    ##  [1] compiler_4.0.3  magrittr_2.0.1  tools_4.0.3     htmltools_0.5.1
+    ##  [5] yaml_2.2.1      stringi_1.5.3   rmarkdown_2.7   knitr_1.30     
+    ##  [9] stringr_1.4.0   xfun_0.20       digest_0.6.27   rlang_0.4.10   
+    ## [13] evaluate_0.14
