@@ -1,7 +1,7 @@
 Differential Gene Expression Analysis with DESEq2
 ================
 Bernice Waweru
-Thu 06, May 2021
+Fri 07, May 2021
 
 -   [1. Generate a table of counts for all
     samples](#1-generate-a-table-of-counts-for-all-samples)
@@ -19,6 +19,9 @@ Thu 06, May 2021
             function](#322-running-the-deseq-function)
         -   [3.2.3 Visualise the DESeq
             results](#323-visualise-the-deseq-results)
+        -   [3.2.4 Save results of Differentially Eexpressed
+            genes](#324-save-results-of-differentially-eexpressed-genes)
+        -   [3.2.5 Plot counts](#325-plot-counts)
 -   [Session information](#session-information)
 
 With the preliminary steps complete, we now move to use the counts table
@@ -428,7 +431,13 @@ sum(res$padj < 0.05, na.rm=T)
 
     ## [1] 7635
 
-*7,635* genes with padj vaule less than **0.05**.
+*7,635* genes with padj value less than **0.05**.
+
+We can order our results by the smallest *p* value.
+
+``` r
+res_ordrd <- res[order(res$pvalue),]
+```
 
 #### 3.2.3 Visualise the DESeq results
 
@@ -442,7 +451,7 @@ Let’s plot the MA plot.
 plotMA(res, ylim=c(-7,7))
 ```
 
-![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 In general, we would expect the expression of genes to remain consistent
 between conditions and so the MA plot should be similar to the shape of
@@ -478,7 +487,7 @@ ggplot(res_df, aes(baseMean, log2FoldChange, colour=significant)) + geom_point(s
   scale_colour_manual(name="q-value", values=("Significant"="red"), na.value="grey50") + theme_bw()
 ```
 
-![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
 ``` r
 # with a bit more detail
@@ -491,7 +500,7 @@ ma_plot <- ggplot(res_df, aes(baseMean, log2FoldChange, colour=padj)) + geom_poi
 print(ma_plot)
 ```
 
-![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-16-2.png)<!-- -->
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-17-2.png)<!-- -->
 
 ``` r
 # let's save image
@@ -509,6 +518,130 @@ function automatically performs independent filtering using the mean of
 normalized counts. This is done to increase the power to detect an event
 by not testing those genes which are unlikely to be significant based on
 their high dispersion.
+
+#### 3.2.4 Save results of Differentially Eexpressed genes
+
+We can filter our results to save the genes that have been up or down
+regulated.
+
+We note from the package notes that *results function automatically
+performs independent filtering based on the mean of normalized counts
+for each gene, optimizing the number of genes which will have an
+adjusted p value below a given FDR cutoff, alpha. Independent filtering
+is further discussed below. By default the argument alpha is set to 0.1.
+If the adjusted p value cutoff will be a value other than 0.1, alpha
+should be set to that value:*
+
+We have set our cut at *0.05*, hence we adjust the alpha value as well.
+
+``` r
+res_05 <- results(dds_dseq, alpha = 0.05)
+
+# looking at the summary now
+
+summary(res_05)
+```
+
+    ## 
+    ## out of 45855 with nonzero total read count
+    ## adjusted p-value < 0.05
+    ## LFC > 0 (up)       : 3633, 7.9%
+    ## LFC < 0 (down)     : 4133, 9%
+    ## outliers [1]       : 55, 0.12%
+    ## low counts [2]     : 12442, 27%
+    ## (mean count < 2)
+    ## [1] see 'cooksCutoff' argument of ?results
+    ## [2] see 'independentFiltering' argument of ?results
+
+We save the genes that have been *up-regulated*, at a cut-off padj value
+of 0.05 and log2foldchange of higher than 0.
+
+``` r
+res_up <- res_05[ which(res_05$padj < 0.05 & res_05$log2FoldChange > 0),]
+
+head(res_up)
+```
+
+    ## log2 fold change (MLE): texture hard vs soft 
+    ## Wald test p-value: texture hard vs soft 
+    ## DataFrame with 6 rows and 6 columns
+    ##       baseMean log2FoldChange     lfcSE      stat      pvalue        padj
+    ##      <numeric>      <numeric> <numeric> <numeric>   <numeric>   <numeric>
+    ## g50   861.0165       0.641521  0.204972   3.12979 1.74929e-03 1.26250e-02
+    ## g56   358.7213       2.699650  0.579686   4.65709 3.20715e-06 8.75483e-05
+    ## g62  2403.3583       1.313352  0.417237   3.14774 1.64539e-03 1.20551e-02
+    ## g72    16.7497       1.679181  0.657890   2.55237 1.06992e-02 4.71536e-02
+    ## g134  932.7006       1.200775  0.465706   2.57839 9.92606e-03 4.47149e-02
+    ## g158  164.2149       0.952083  0.211202   4.50793 6.54634e-06 1.55425e-04
+
+``` r
+nrow(res_up) # 3633 genes are up-regulated at a pvlaue of 0.05
+```
+
+    ## [1] 3633
+
+We save the genes that have been *down-regulated*, at a cut-off padj
+value of 0.05 and log2foldchange of less than 0.
+
+``` r
+res_down <- res_05[ which(res_05$padj < 0.05 & res_05$log2FoldChange < 0),]
+
+head(res_down)
+```
+
+    ## log2 fold change (MLE): texture hard vs soft 
+    ## Wald test p-value: texture hard vs soft 
+    ## DataFrame with 6 rows and 6 columns
+    ##       baseMean log2FoldChange     lfcSE      stat      pvalue        padj
+    ##      <numeric>      <numeric> <numeric> <numeric>   <numeric>   <numeric>
+    ## g64  1239.3538       -0.50544  0.150414  -3.36033 7.78493e-04 6.83754e-03
+    ## g67  2329.0135       -1.58400  0.254137  -6.23285 4.58020e-10 3.99964e-08
+    ## g108   46.2860       -3.26829  0.684415  -4.77531 1.79430e-06 5.40201e-05
+    ## g174   80.5152       -1.06557  0.405960  -2.62482 8.66956e-03 4.06236e-02
+    ## g178   85.1378       -3.22530  0.686913  -4.69535 2.66145e-06 7.54296e-05
+    ## g184  795.1681       -1.61943  0.521850  -3.10325 1.91409e-03 1.34563e-02
+
+``` r
+nrow(res_down) # 3633 genes are up-regulated at a pvlaue of 0.05
+```
+
+    ## [1] 4133
+
+Save above data sets into a csv file.
+
+``` r
+write.csv(as.data.frame(res_up), file = "results/texture_up_reg_genes.csv", quote = F)
+
+write.csv(as.data.frame(res_down), file = "results/texture_down_reg_genes.csv", quote = F)
+```
+
+#### 3.2.5 Plot counts
+
+It is sometimes useful to plot counts of a single gene across groups. In
+our case we would like to see how the genes with the smallest p-adj
+values form the up and down regulated genes in terms of texture as a
+design factor behave between the groups.
+
+From the exported results, gene **g62112** has the lowest padj value for
+the up-regulated genes.
+
+``` r
+plotCounts(dds_dseq, gene="g62112", intgroup = "texture")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+While for the down regulated genes, **g54621** has the lowest padj
+value.
+
+``` r
+plotCounts(dds_dseq, gene = "g54621", intgroup = "texture")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+The plots are representative of what we are trying to look at with the
+analysis. Good check point.
 
 ## Session information
 
