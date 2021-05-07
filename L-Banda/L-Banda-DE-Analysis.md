@@ -22,6 +22,8 @@ Fri 07, May 2021
         -   [3.2.4 Save results of Differentially Eexpressed
             genes](#324-save-results-of-differentially-eexpressed-genes)
         -   [3.2.5 Plot counts](#325-plot-counts)
+        -   [3.2.6 DESeq with design formula for
+            color](#326-deseq-with-design-formula-for-color)
 -   [Session information](#session-information)
 
 With the preliminary steps complete, we now move to use the counts table
@@ -643,9 +645,192 @@ plotCounts(dds_dseq, gene = "g54621", intgroup = "texture")
 The plots are representative of what we are trying to look at with the
 analysis. Good check point.
 
+#### 3.2.6 DESeq with design formula for color
+
+We ran the first DESeq with texture as the main design formula.
+
+But we also want to see whether color as a trait has an effect on the
+differentially expressed genes/
+
+Let’s re-do the analysis with both color and texture as the design
+formula, and then save the results for color like we did for texture.
+
+``` r
+dds
+```
+
+    ## class: DESeqDataSet 
+    ## dim: 45855 12 
+    ## metadata(1): version
+    ## assays(1): counts
+    ## rownames(45855): g2 g3 ... g64294 g64295
+    ## rowData names(0):
+    ## colnames(12): RESISTO_1 RESISTO_2 ... NASPOT11_2 NASPOT11_3
+    ## colData names(2): colour texture
+
+``` r
+ddsCol <- dds
+
+design(ddsCol) <- formula(~ colour + texture) # set the design to be color and texture
+
+# now we re-run the DESeq function
+
+ddsCol_dseq <- DESeq(ddsCol)
+```
+
+    ## estimating size factors
+
+    ## estimating dispersions
+
+    ## gene-wise dispersion estimates
+
+    ## mean-dispersion relationship
+
+    ## final dispersion estimates
+
+    ## fitting model and testing
+
+``` r
+ddsCol_res <- results(ddsCol_dseq) # extract the results 
+
+head(ddsCol_res)
+```
+
+    ## log2 fold change (MLE): texture hard vs soft 
+    ## Wald test p-value: texture hard vs soft 
+    ## DataFrame with 6 rows and 6 columns
+    ##     baseMean log2FoldChange     lfcSE      stat    pvalue      padj
+    ##    <numeric>      <numeric> <numeric> <numeric> <numeric> <numeric>
+    ## g2  4.538450       1.150716  0.933545  1.232630 0.2177139  0.363655
+    ## g3  7.897302       1.420110  0.733104  1.937121 0.0527306  0.130234
+    ## g4  0.467127      -0.584274  3.064801 -0.190640 0.8488075        NA
+    ## g5  0.168735      -0.955689  3.113705 -0.306930 0.7588967        NA
+    ## g6 23.350558      -0.537279  0.352780 -1.522987 0.1277620  0.248620
+    ## g7 14.879691       0.291097  0.412432  0.705805 0.4803091  0.629196
+
+The `contrast` argument can be used to retrieve log2 fold changes, p
+value and p adj values of other variable other than the first one in the
+design. In our case that is color. Let’s use that to get results for
+color at alpha of *0.05*.
+
+``` r
+resCol <- results(ddsCol_dseq, contrast = c("colour", "orange", "cream"), alpha = 0.05)
+
+head(resCol)
+```
+
+    ## log2 fold change (MLE): colour orange vs cream 
+    ## Wald test p-value: colour orange vs cream 
+    ## DataFrame with 6 rows and 6 columns
+    ##     baseMean log2FoldChange     lfcSE      stat      pvalue       padj
+    ##    <numeric>      <numeric> <numeric> <numeric>   <numeric>  <numeric>
+    ## g2  4.538450       0.540729  0.931810  0.580299 0.561712931 0.73384660
+    ## g3  7.897302       1.251907  0.732906  1.708141 0.087610140 0.22247919
+    ## g4  0.467127       2.227936  3.066386  0.726567 0.467490957         NA
+    ## g5  0.168735      -1.080395  3.113705 -0.346980 0.728606048         NA
+    ## g6 23.350558       0.395209  0.352684  1.120574 0.262469043 0.46091729
+    ## g7 14.879691      -1.547836  0.417684 -3.705761 0.000210757 0.00208136
+
+``` r
+summary(resCol)
+```
+
+    ## 
+    ## out of 45855 with nonzero total read count
+    ## adjusted p-value < 0.05
+    ## LFC > 0 (up)       : 4209, 9.2%
+    ## LFC < 0 (down)     : 3472, 7.6%
+    ## outliers [1]       : 161, 0.35%
+    ## low counts [2]     : 11554, 25%
+    ## (mean count < 2)
+    ## [1] see 'cooksCutoff' argument of ?results
+    ## [2] see 'independentFiltering' argument of ?results
+
+We generate the list of up and down regulated genes for color and save
+them as csv files.
+
+``` r
+res_down <- res_05[ which(res_05$padj < 0.05 & res_05$log2FoldChange < 0),]
+
+resCol_up <- resCol[ which(resCol$padj < 0.05 & resCol$log2FoldChange > 0),]
+
+nrow(resCol_up) # 4209 genes up regulated for color
+```
+
+    ## [1] 4209
+
+``` r
+resCol_down <- resCol[ which(resCol$padj < 0.05 & resCol$log2FoldChange < 0),]
+
+nrow(resCol_down) # 3472 genes down regulated for color
+```
+
+    ## [1] 3472
+
+Save them as csv files
+
+``` r
+write.csv(resCol_up, file = "results/color_up_reg_genes.csv", quote = F)
+
+write.csv(resCol_down, file = "results/colour_down_reg_genes.csv", quote = F)
+```
+
+##### Plot counts for colour
+
+From the exported results, gene **g19362** has the lowest padj value for
+the up-regulated genes for colour.
+
+``` r
+plotCounts(ddsCol_dseq, gene="g19362", intgroup = "colour")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+
+While for the down regulated genes, **g51961** has the lowest padj value
+for colour.
+
+``` r
+plotCounts(ddsCol_dseq, gene = "g51961", intgroup = "colour")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+
+This shows that g19362 is up-regulated for samples that are
+orange-fleshed and down for cream-fleshed, while g51961 is up-regulated
+for genes that are cream-fleshed and down for orange fleshed sample. Is
+there a correlation? We can search for the annotation of these genes and
+find out.
+
+We use `grep` command in bash shell to find them from the [annotation
+file](https://ipomoea-genome.org/pasi3.annotation).
+
+We start with top 3 up-regulated genes for color, *g19362*, *g51413* and
+*g27356*.
+
+    grep "g19362 "  pasi3.annotation
+
+-   **g19362** PREDICTED: ubiquitin-60S ribosomal protein L40
+    \[Nicotiana tomentosiformis\]
+-   **g51413** PREDICTED: zinc finger BED domain-containing protein
+    RICESLEEPER 1-like \[Sesamum indicum\]
+-   **g27356** PREDICTED: probable 20S rRNA accumulation protein 4
+    \[Nicotiana sylvestris\]
+
+And now for down regulated genes top three are *g51961*, *g12576* and
+*g34258*.
+
+-   **g51961** PREDICTED: F-box/FBD/LRR-repeat protein At1g13570-like
+    \[Nicotiana sylvestris\]
+-   **g12576** PREDICTED: glutathione S-transferase U17-like \[Nicotiana
+    tomentosiformis\]
+-   **g34258** PREDICTED: probable 2-oxoglutarate/Fe(II)-dependent
+    dioxygenase isoform X1 \[Nicotiana tomentosiformis\]
+
+Would be interesting to see what these genes do.
+
 ## Session information
 
-Details of packages used for the workflow
+Details of packages used for the work flow
 
 ``` r
 sessionInfo()
