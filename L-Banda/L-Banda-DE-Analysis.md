@@ -24,6 +24,9 @@ Thu 13, May 2021
         -   [3.2.5 Plot counts](#325-plot-counts)
         -   [3.2.6 DESeq with design formula for
             color](#326-deseq-with-design-formula-for-color)
+        -   [3.2.7 DESeq with design formula of interactions between
+            color and
+            texture](#327-deseq-with-design-formula-of-interactions-between-color-and-texture)
     -   [3.3 Data quality assessment by clustering and
         visualization](#33-data-quality-assessment-by-clustering-and-visualization)
 -   [Session information](#session-information)
@@ -255,7 +258,7 @@ all(rownames(lb_coldata) == colnames(lb_cts))
 
 Great! Now they are in the same order.
 
-## 3. Differential Gene Expression with [DESEq2]()
+## 3. Differential Gene Expression with [DESEq2](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0550-8)
 
 Differential expression analysis with DESeq2 involves multiple steps.
 Briefly,
@@ -541,7 +544,8 @@ adjusted p value below a given FDR cutoff, alpha. By default the
 argument alpha is set to 0.1. If the adjusted p value cutoff will be a
 value other than 0.1, alpha should be set to that value:*
 
-We have set our cut at *0.05*, hence we adjust the alpha value as well.
+We have set our cutoff at *0.05*, hence we adjust the alpha value as
+well.
 
 ``` r
 res_05 <- results(dds_dseq, alpha = 0.05)
@@ -628,7 +632,7 @@ write.csv(as.data.frame(res_down), file = "results/texture_down_reg_genes.csv", 
 
 It is sometimes useful to plot counts of a single gene across groups. In
 our case we would like to see how the genes with the smallest p-adj
-values form the up and down regulated genes in terms of texture as a
+values from the up and down regulated genes in terms of texture as a
 design factor behave between the groups.
 
 From the exported results, gene **g62112** has the lowest padj value for
@@ -833,15 +837,483 @@ And now for down regulated genes top three are *g51961*, *g12576* and
 
 Would be interesting to see what these genes do.
 
+#### 3.2.7 DESeq with design formula of interactions between color and texture
+
+We add interaction terms to the design to test if the log2 fold changes
+for texture are different based on the color or vise versa.
+
+First we generate two factors into an interaction term named `group`.
+Then reassign the design to the group factor. After which we run the
+DESeq function with the new design.
+
+``` r
+dds$group <- factor(paste0(dds$texture, dds$colour))
+
+design(dds) <- ~ group
+
+dds_int <- DESeq(dds)
+```
+
+    ## estimating size factors
+
+    ## estimating dispersions
+
+    ## gene-wise dispersion estimates
+
+    ## mean-dispersion relationship
+
+    ## final dispersion estimates
+
+    ## fitting model and testing
+
+``` r
+# we can have an MA plot to visualize the results
+
+plotMA(results(dds_int))
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+
+We get the result names so we now what names to use to get the contrast.
+
+``` r
+resultsNames(dds_int)
+```
+
+    ## [1] "Intercept"                     "group_hardorange_vs_hardcream"
+    ## [3] "group_softcream_vs_hardcream"  "group_softorange_vs_hardcream"
+
+The first is *hardorange* vs *hardcream*, lets see if colour has an
+effect on which genes are up or down regulated, at a cutoff of 0.05.
+
+``` r
+results_HO_vs_HC <- results(dds_int, contrast = c("group", "hardorange", "hardcream"), alpha = 0.05)
+
+# let's order the results by p-adj values
+
+results_HO_vs_HC <- results_HO_vs_HC[order(results_HO_vs_HC$padj),]
+  
+summary(results_HO_vs_HC)
+```
+
+    ## 
+    ## out of 45855 with nonzero total read count
+    ## adjusted p-value < 0.05
+    ## LFC > 0 (up)       : 7170, 16%
+    ## LFC < 0 (down)     : 6354, 14%
+    ## outliers [1]       : 38, 0.083%
+    ## low counts [2]     : 11558, 25%
+    ## (mean count < 2)
+    ## [1] see 'cooksCutoff' argument of ?results
+    ## [2] see 'independentFiltering' argument of ?results
+
+``` r
+#lets look at the top genes
+
+head(results_HO_vs_HC)
+```
+
+    ## log2 fold change (MLE): group hardorange vs hardcream 
+    ## Wald test p-value: group hardorange vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g11727  1766.535       -7.22577  0.228735  -31.5902 5.03549e-219 1.72511e-214
+    ## g16611  1479.995       -4.68735  0.203124  -23.0763 8.00666e-118 1.37150e-113
+    ## g20002   686.046        4.85341  0.215879   22.4820 6.22081e-112 7.10396e-108
+    ## g60774  1105.279        4.90241  0.218813   22.4046 3.54841e-111 3.03912e-107
+    ## g23023   514.092       -5.13128  0.232054  -22.1125 2.39773e-108 1.64287e-104
+    ## g42073  1840.765       -7.86958  0.367854  -21.3932 1.54439e-101  8.81822e-98
+
+``` r
+# extracting the up and down regulated genes 
+
+# UP
+results_HO_vs_HC_up <- results_HO_vs_HC[ which(results_HO_vs_HC$padj < 0.05 & results_HO_vs_HC$log2FoldChange > 0),]
+
+nrow(results_HO_vs_HC_up) # 7170 genes 
+```
+
+    ## [1] 7170
+
+``` r
+head(results_HO_vs_HC_up)
+```
+
+    ## log2 fold change (MLE): group hardorange vs hardcream 
+    ## Wald test p-value: group hardorange vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g20002   686.046        4.85341  0.215879   22.4820 6.22081e-112 7.10396e-108
+    ## g60774  1105.279        4.90241  0.218813   22.4046 3.54841e-111 3.03912e-107
+    ## g4064    347.114        4.19421  0.203353   20.6252  1.62952e-94  6.20287e-91
+    ## g4909  13020.985        3.78651  0.195514   19.3669  1.46736e-83  3.35136e-80
+    ## g11901   332.186        5.01575  0.260261   19.2720  9.22261e-83  1.97473e-79
+    ## g27168  1546.156        2.33444  0.125247   18.6386  1.56240e-77  2.81717e-74
+
+``` r
+# DOWN
+
+results_HO_vs_HC_down <- results_HO_vs_HC[ which(results_HO_vs_HC$padj < 0.05 & results_HO_vs_HC$log2FoldChange < 0),]
+
+nrow(results_HO_vs_HC_down) # 6354 genes 
+```
+
+    ## [1] 6354
+
+``` r
+head(results_HO_vs_HC_down)
+```
+
+    ## log2 fold change (MLE): group hardorange vs hardcream 
+    ## Wald test p-value: group hardorange vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g11727  1766.535       -7.22577  0.228735  -31.5902 5.03549e-219 1.72511e-214
+    ## g16611  1479.995       -4.68735  0.203124  -23.0763 8.00666e-118 1.37150e-113
+    ## g23023   514.092       -5.13128  0.232054  -22.1125 2.39773e-108 1.64287e-104
+    ## g42073  1840.765       -7.86958  0.367854  -21.3932 1.54439e-101  8.81822e-98
+    ## g24257  2259.503       -2.99906  0.143862  -20.8468  1.62944e-96  7.97470e-93
+    ## g12576   626.582       -3.33714  0.161234  -20.6976  3.64373e-95  1.56038e-91
+
+``` r
+# lets plot the top gene
+
+dat_1 <- plotCounts(dds, gene = "g11727", intgroup = "group", returnData = T)
+
+#plot using ggplot
+
+require(ggplot2)
+
+ggplot(dat_1, aes(x=group, y=count, col=group)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) +
+  ggtitle("g11727")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
+``` r
+# another gene
+
+dat_2 <- plotCounts(dds, gene = "g16611", intgroup = "group", returnData = T)
+
+#plot using ggplot
+
+
+ggplot(dat_2, aes(x=group, y=count, col=group)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) +
+  ggtitle("g16611")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-32-2.png)<!-- -->
+
+Is it possible to plot the two genes together?
+
+``` r
+colnames(dat_1)
+```
+
+    ## [1] "count" "group"
+
+``` r
+dat_1$gene <- c(rep("g11727", 12))
+dat_2$gene <- c(rep("g16611", 12))
+
+colnames(dat_1) <- c("count", "group","gene" )
+colnames(dat_2) <-  c("count", "group", "gene")
+rbind(dat_1, dat_2) -> dat
+
+ggplot(dat, aes(x=group, y=count, col=gene)) + 
+  geom_point(position=position_jitter(w=0.1,h=0))
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+
+The next is *softcream* vs *hardcream*, lets see if colour has an effect
+on which genes are up or down regulated, at a cutoff of 0.05.
+
+``` r
+results_SC_vs_HC <- results(dds_int, contrast = c("group", "softcream", "hardcream"), alpha = 0.05)
+
+# let's order the results by p-adj values
+
+results_SC_vs_HC <- results_SC_vs_HC[order(results_SC_vs_HC$padj),]
+  
+summary(results_SC_vs_HC)
+```
+
+    ## 
+    ## out of 45855 with nonzero total read count
+    ## adjusted p-value < 0.05
+    ## LFC > 0 (up)       : 9308, 20%
+    ## LFC < 0 (down)     : 8877, 19%
+    ## outliers [1]       : 38, 0.083%
+    ## low counts [2]     : 10669, 23%
+    ## (mean count < 1)
+    ## [1] see 'cooksCutoff' argument of ?results
+    ## [2] see 'independentFiltering' argument of ?results
+
+``` r
+#lets look at the top genes
+
+head(results_SC_vs_HC)
+```
+
+    ## log2 fold change (MLE): group softcream vs hardcream 
+    ## Wald test p-value: group softcream vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g20002   686.046        6.03303  0.214885   28.0757 1.94235e-173 6.82697e-169
+    ## g59775  4426.421       -3.51626  0.131724  -26.6941 5.51462e-157 9.69139e-153
+    ## g17378  1962.629       -6.77987  0.256093  -26.4742 1.92045e-154 2.25000e-150
+    ## g17960  1026.723       -3.57957  0.137090  -26.1110 2.73371e-150 2.40211e-146
+    ## g859     815.122       -4.94524  0.191091  -25.8791 1.14638e-147 8.05857e-144
+    ## g21290  3697.052       -6.15661  0.240787  -25.5686 3.40682e-144 1.99572e-140
+
+``` r
+# extracting the up and down regulated genes, this time we put the  log2 fold change cutoff to 5 to get them most significant genes and not the whole list
+
+# UP
+results_SC_vs_HC_up <- results_SC_vs_HC[ which(results_SC_vs_HC$padj < 0.05 & results_SC_vs_HC$log2FoldChange > 5),]
+
+nrow(results_SC_vs_HC_up) #  916 genes with log2 fold change greater than 5
+```
+
+    ## [1] 916
+
+``` r
+head(results_SC_vs_HC_up)
+```
+
+    ## log2 fold change (MLE): group softcream vs hardcream 
+    ## Wald test p-value: group softcream vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g20002   686.046        6.03303  0.214885   28.0757 1.94235e-173 6.82697e-169
+    ## g37757  2528.091        5.11191  0.217010   23.5561 1.08669e-122 3.47228e-119
+    ## g60774  1105.279        5.13033  0.218701   23.4582 1.08972e-121 3.19179e-118
+    ## g36402  4641.841        5.11870  0.249085   20.5500  7.68886e-94  1.28690e-90
+    ## g37800  1764.977        5.17485  0.254014   20.3723  2.94253e-92  4.70110e-89
+    ## g43366   389.982        5.55970  0.291489   19.0734  4.19808e-81  3.35351e-78
+
+``` r
+# DOWN
+
+results_SC_vs_HC_down <- results_SC_vs_HC[ which(results_SC_vs_HC$padj < 0.05 & results_SC_vs_HC$log2FoldChange < -5),]
+
+nrow(results_SC_vs_HC_down) # 717 genes with log2 fold change less that -5
+```
+
+    ## [1] 717
+
+``` r
+head(results_SC_vs_HC_down)
+```
+
+    ## log2 fold change (MLE): group softcream vs hardcream 
+    ## Wald test p-value: group softcream vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g17378  1962.629       -6.77987  0.256093  -26.4742 1.92045e-154 2.25000e-150
+    ## g21290  3697.052       -6.15661  0.240787  -25.5686 3.40682e-144 1.99572e-140
+    ## g21811   656.269       -5.09150  0.239770  -21.2349 4.54660e-100  9.40023e-97
+    ## g46662 42476.419       -6.39111  0.331398  -19.2853  7.13631e-83  6.43146e-80
+    ## g43385  1533.985       -9.63467  0.500190  -19.2620  1.11909e-82  9.83345e-80
+    ## g1044   2359.847       -5.06316  0.265383  -19.0787  3.79524e-81  3.10221e-78
+
+``` r
+# lets plot the top up-reg gene
+
+dat <- plotCounts(dds, gene = "g20002", intgroup = "group", returnData = T)
+
+#plot using ggplot
+
+require(ggplot2)
+
+ggplot(dat, aes(x=group, y=count, col=group)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) +
+  ggtitle("g20002")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+``` r
+# te top down-reg gene
+
+dat <- plotCounts(dds, gene = "g17378", intgroup = "group", returnData = T)
+
+#plot using ggplot
+
+
+ggplot(dat, aes(x=group, y=count, col=group)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) +
+  ggtitle("g17378")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-34-2.png)<!-- -->
+
+The last is *softorange* vs *hardcream*, lets see if colour has an
+effect on which genes are up or down regulated, at a cutoff of 0.05.
+
+``` r
+results_SO_vs_HC <- results(dds_int, contrast = c("group", "softorange", "hardcream"), alpha = 0.05)
+
+# let's order the results by p-adj values
+
+results_SO_vs_HC <- results_SO_vs_HC[order(results_SO_vs_HC$padj),]
+  
+summary(results_SO_vs_HC)
+```
+
+    ## 
+    ## out of 45855 with nonzero total read count
+    ## adjusted p-value < 0.05
+    ## LFC > 0 (up)       : 7520, 16%
+    ## LFC < 0 (down)     : 6590, 14%
+    ## outliers [1]       : 38, 0.083%
+    ## low counts [2]     : 10669, 23%
+    ## (mean count < 1)
+    ## [1] see 'cooksCutoff' argument of ?results
+    ## [2] see 'independentFiltering' argument of ?results
+
+``` r
+#lets look at the top genes
+
+head(results_SO_vs_HC)
+```
+
+    ## log2 fold change (MLE): group softorange vs hardcream 
+    ## Wald test p-value: group softorange vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g51413   531.889        5.46792  0.240999   22.6886 5.81219e-114 2.04287e-109
+    ## g60603   947.899       -6.37849  0.286369  -22.2736 6.65726e-110 1.16995e-105
+    ## g21337  2892.525       -4.94219  0.224408  -22.0232 1.72466e-107 2.02061e-103
+    ## g60774  1105.279        4.79055  0.218959   21.8788 4.13507e-106 3.63349e-102
+    ## g21811   656.269       -5.29022  0.243144  -21.7575 5.86288e-105 4.12137e-101
+    ## g17007  1428.119        5.09380  0.250125   20.3650  3.41869e-92  2.00267e-88
+
+``` r
+# extracting the up and down regulated genes, this time we put the  log2 fold change cutoff to 5 to get them most significant genes and not the whole list
+
+# UP
+results_SO_vs_HC_up <- results_SO_vs_HC[ which(results_SO_vs_HC$padj < 0.05 & results_SO_vs_HC$log2FoldChange > 5),]
+
+nrow(results_SO_vs_HC_up) #  853 genes with log2 fold change greater than 5
+```
+
+    ## [1] 853
+
+``` r
+head(results_SO_vs_HC_up)
+```
+
+    ## log2 fold change (MLE): group softorange vs hardcream 
+    ## Wald test p-value: group softorange vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g51413   531.889        5.46792  0.240999   22.6886 5.81219e-114 2.04287e-109
+    ## g17007  1428.119        5.09380  0.250125   20.3650  3.41869e-92  2.00267e-88
+    ## g13361   442.682        8.60187  0.454480   18.9268  6.85781e-80  2.41038e-76
+    ## g42635   473.050        5.04827  0.268849   18.7774  1.15678e-78  3.69622e-75
+    ## g17737   187.469        5.10693  0.308534   16.5522  1.54282e-61  2.16908e-58
+    ## g33005   224.577        6.92557  0.430735   16.0785  3.60962e-58  4.37486e-55
+
+``` r
+# DOWN
+
+results_SO_vs_HC_down <- results_SO_vs_HC[ which(results_SO_vs_HC$padj < 0.05 & results_SO_vs_HC$log2FoldChange < -5),]
+
+nrow(results_SO_vs_HC_down) # 498 genes with log2 fold change less that -5
+```
+
+    ## [1] 498
+
+``` r
+head(results_SO_vs_HC_down)
+```
+
+    ## log2 fold change (MLE): group softorange vs hardcream 
+    ## Wald test p-value: group softorange vs hardcream 
+    ## DataFrame with 6 rows and 6 columns
+    ##         baseMean log2FoldChange     lfcSE      stat       pvalue         padj
+    ##        <numeric>      <numeric> <numeric> <numeric>    <numeric>    <numeric>
+    ## g60603   947.899       -6.37849  0.286369  -22.2736 6.65726e-110 1.16995e-105
+    ## g21811   656.269       -5.29022  0.243144  -21.7575 5.86288e-105 4.12137e-101
+    ## g17857   479.997       -6.64626  0.338811  -19.6164  1.11941e-85  4.37167e-82
+    ## g31224   560.218       -6.09819  0.333839  -18.2669  1.51893e-74  3.81337e-71
+    ## g20971   482.591       -6.35016  0.352627  -18.0082  1.68086e-72  3.93859e-69
+    ## g13416   331.301       -7.10088  0.424960  -16.7095  1.11719e-62  1.78487e-59
+
+``` r
+# lets plot the top up-reg gene
+
+dat <- plotCounts(dds, gene = "g51413", intgroup = "group", returnData = T)
+
+#plot using ggplot
+
+require(ggplot2)
+
+ggplot(dat, aes(x=group, y=count, col=group)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) +
+  ggtitle("g51413")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-35-1.png)<!-- -->
+
+``` r
+# th top down-reg gene
+
+dat <- plotCounts(dds, gene = "g60603", intgroup = "group", returnData = T)
+
+#plot using ggplot
+
+
+ggplot(dat, aes(x=group, y=count, col=group)) + 
+  geom_point(position=position_jitter(w=0.1,h=0)) +
+  ggtitle("g60603")
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-35-2.png)<!-- -->
+
 ### 3.3 Data quality assessment by clustering and visualization
 
 For testing differentially expressed genes, DESeq works on raw counts of
 data. But for downstream analysis, its useful to transform the data. As
 described in the
 [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-matrix-input),
-various methods are available. We will use
-`variance stabalizing transformation`, implemented by the function
-`vst`.
+two transformation algorithms are implemented within DESEq2.
+
+The point of these two transformations, (`VST` and `rlog`), is to remove
+the dependence of the variance on the mean, particularly the high
+variance of the logarithm of count data when the mean is low. Both VST
+and rlog use the experiment-wide trend of variance over mean, in order
+to transform the data to remove the experiment-wide trend. Note that we
+do not require or desire that all the genes have exactly the same
+variance after transformation. Indeed, in a figure below, you will see
+that after the transformations the genes with the same mean do not have
+exactly the same standard deviations, but that the experiment-wide trend
+has flattened. It is those genes with row variance above the trend which
+will allow us to cluster samples into interesting groups.
+
+The two functions, `vst` and `rlog` have an argument `blind`, for
+whether the transformation should be blind to the sample information
+specified by the design formula.When `blind` equals `TRUE` (the
+default), the functions will re-estimate the dispersions using only an
+intercept. By setting `blind` to `FALSE`, the dispersions already
+estimated will be used to perform transformations, or if not present,
+they will be estimated using the current design formula.
+
+We will use `variance stabalizing transformation`, implemented by the
+function `vst`, and set `bind` to `FALSE` to as we are interested in the
+experimental design.
 
 We use it to transform the raw counts and plot a heatmap. The heatmap is
 generated by functions in the `pheatmap` package, so we install those
@@ -872,7 +1344,7 @@ pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 ```
 
-![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-36-1.png)<!-- -->
 
 ``` r
 # instead of row means we can use row variances, so we plot the most variable genes among samples
@@ -885,7 +1357,7 @@ pheatmap(assay(vsd)[topVarGenes,], cluster_rows=FALSE, show_rownames=T,
          cluster_cols=FALSE, annotation_col=df)
 ```
 
-![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-36-2.png)<!-- -->
 
 It’s interesting to see that in this last heat map, we see the two genes
 that were the top,(with the lowest padj value) in terms of texture, up
@@ -895,50 +1367,36 @@ heatmap also provides a picture of other genes that we could look into.
 For example genes *g25533* and *g13361* seem to be opposites of each
 other
 
--   To do
--   select the up and down regulated genes for texture and colour to use
-    for plotting
--   order the levels for color so they are together in the heatmap
+Will there be difference with the heatmap when we plot using the dds
+object with the group interaction as a variable?
 
-How do we select for the genes that were up/down regulated from the dseq
-results object to be represented in the heat map.
-
-Let’s see how to do that;
+We can try to see;
 
 ``` r
-as.data.frame(res_up)
+vsd_int <- vst(dds_int, blind = F)
 
-res_up_ord <- as.data.frame(res_up[order(res_up$padj),])
+# we select the top 30 genes based on row variances
 
-# we have ordered the results of the texture up regulated genes by padj values, hence we have g62112 at the top.
+topVarGenes_int <- head(order(rowVars(assay(vsd_int)),decreasing=TRUE ), 30 ) # picking the top 30 most variable genes
 
-#Okay we need to have a list of the top most regulated genes, then we can extract them from the dds object by row names
-
-top_50_tex <- rownames(res_up_ord)[1:100]
-
-counts(resCol_up)
-
-#we first try to subset using dplyr
-require(dplyr)
-
-dds_col_dseq_top_50 
-
-row.names(rownames(ddsCol_dseq)) %in% top_50_tex
-
-# maybe we can do it differently
-
-ddsCol_dseq@assays@data@listData$counts %>% as.data.frame() -> ddsCol_dseq_df
-
-ddsCol_dseq@assays@data@listData$counts %>% class()
-
-ddsCol_dseq_df %>% filter(row.names(ddsCol_dseq_df) %in% top_50_tex) -> new_ddsCol_counts
+# coarse into a dataframe
 
 
+df_int <- as.data.frame(colData(dds_int)[, c("colour", "texture", "group")])
 
-nrow(new_ddsCol_counts)
-
-ddsCol_dseq@assays@data@listData$counts <- as.matrix(new_ddsCol_counts)
+# plot 
+heatmap_int <- pheatmap(assay(vsd)[topVarGenes,], cluster_rows=FALSE, show_rownames=T,
+         cluster_cols=FALSE, annotation_col=df_int)
 ```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-37-1.png)<!-- -->
+
+![heatmap\_with\_group\_variable](results/heatmap_intaraction_may_13.svg)
+
+The top two genes are the same, and clearly responsible for difference
+between the hard and soft textured samples. The other genes are now
+ranked differently but most are still present as from the previous
+heatmap based on row variances.
 
 ## Session information
 
