@@ -1,7 +1,7 @@
 Differential Gene Expression Analysis with DESEq2
 ================
 Bernice Waweru
-Fri 07, May 2021
+Thu 13, May 2021
 
 -   [1. Generate a table of counts for all
     samples](#1-generate-a-table-of-counts-for-all-samples)
@@ -19,11 +19,13 @@ Fri 07, May 2021
             function](#322-running-the-deseq-function)
         -   [3.2.3 Visualise the DESeq
             results](#323-visualise-the-deseq-results)
-        -   [3.2.4 Save results of Differentially Eexpressed
-            genes](#324-save-results-of-differentially-eexpressed-genes)
+        -   [3.2.4 Save results of Differentially Expressed
+            genes](#324-save-results-of-differentially-expressed-genes)
         -   [3.2.5 Plot counts](#325-plot-counts)
         -   [3.2.6 DESeq with design formula for
             color](#326-deseq-with-design-formula-for-color)
+    -   [3.3 Data quality assessment by clustering and
+        visualization](#33-data-quality-assessment-by-clustering-and-visualization)
 -   [Session information](#session-information)
 
 With the preliminary steps complete, we now move to use the counts table
@@ -292,6 +294,12 @@ dds # we have the correct information in the dataframe
     ## colnames(12): RESISTO_1 RESISTO_2 ... NASPOT11_2 NASPOT11_3
     ## colData names(2): colour texture
 
+``` r
+# save as an RData object for easy loading
+
+#save(dds, file = "results/lb_dds.RData")
+```
+
 In the
 [tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-matrix-input)
 , they suggest a pre-filtering of rows with very few reads. We filter to
@@ -323,9 +331,9 @@ dds$texture <- factor(dds$texture, levels = c("soft", "hard"))
 
 #### 3.2.1 Estimating size factors
 
-DESEq has to firt consider the diffence in total reads from the
+DESEq has to first consider the difference in total reads from the
 different samples before the actual test. This is done using
-`estimateSizeFactors`, the result of which will be used to normalise the
+`estimateSizeFactors`, the result of which will be used to normalize the
 data.
 
 ``` r
@@ -521,18 +529,17 @@ normalized counts. This is done to increase the power to detect an event
 by not testing those genes which are unlikely to be significant based on
 their high dispersion.
 
-#### 3.2.4 Save results of Differentially Eexpressed genes
+#### 3.2.4 Save results of Differentially Expressed genes
 
 We can filter our results to save the genes that have been up or down
 regulated.
 
-We note from the package notes that *results function automatically
+We note from the package notes that *`results` function automatically
 performs independent filtering based on the mean of normalized counts
 for each gene, optimizing the number of genes which will have an
-adjusted p value below a given FDR cutoff, alpha. Independent filtering
-is further discussed below. By default the argument alpha is set to 0.1.
-If the adjusted p value cutoff will be a value other than 0.1, alpha
-should be set to that value:*
+adjusted p value below a given FDR cutoff, alpha. By default the
+argument alpha is set to 0.1. If the adjusted p value cutoff will be a
+value other than 0.1, alpha should be set to that value:*
 
 We have set our cut at *0.05*, hence we adjust the alpha value as well.
 
@@ -709,7 +716,7 @@ head(ddsCol_res)
     ## g7 14.879691       0.291097  0.412432  0.705805 0.4803091  0.629196
 
 The `contrast` argument can be used to retrieve log2 fold changes, p
-value and p adj values of other variable other than the first one in the
+value and p adj values of other variable other than the last one in the
 design. In our case that is color. Let’s use that to get results for
 color at alpha of *0.05*.
 
@@ -750,8 +757,6 @@ We generate the list of up and down regulated genes for color and save
 them as csv files.
 
 ``` r
-res_down <- res_05[ which(res_05$padj < 0.05 & res_05$log2FoldChange < 0),]
-
 resCol_up <- resCol[ which(resCol$padj < 0.05 & resCol$log2FoldChange > 0),]
 
 nrow(resCol_up) # 4209 genes up regulated for color
@@ -797,7 +802,7 @@ plotCounts(ddsCol_dseq, gene = "g51961", intgroup = "colour")
 
 This shows that g19362 is up-regulated for samples that are
 orange-fleshed and down for cream-fleshed, while g51961 is up-regulated
-for genes that are cream-fleshed and down for orange fleshed sample. Is
+for genes that are cream-fleshed and down for orange fleshed samples. Is
 there a correlation? We can search for the annotation of these genes and
 find out.
 
@@ -828,6 +833,113 @@ And now for down regulated genes top three are *g51961*, *g12576* and
 
 Would be interesting to see what these genes do.
 
+### 3.3 Data quality assessment by clustering and visualization
+
+For testing differentially expressed genes, DESeq works on raw counts of
+data. But for downstream analysis, its useful to transform the data. As
+described in the
+[tutorial](http://bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.html#count-matrix-input),
+various methods are available. We will use
+`variance stabalizing transformation`, implemented by the function
+`vst`.
+
+We use it to transform the raw counts and plot a heatmap. The heatmap is
+generated by functions in the `pheatmap` package, so we install those
+first.
+
+``` r
+#install.packages("pheatmap", lib = "C:/R/R-4.0.3/library/")
+
+library("pheatmap")
+
+
+# first transform the raw counts
+
+vsd <- vst(ddsCol_dseq, blind=FALSE)
+
+# select the first 20 genes based on normalized row counts
+select <- order(rowMeans(counts(ddsCol_dseq, normalized = TRUE)), decreasing = TRUE)[1:20]
+
+# coarse into a dataframe
+
+
+df <- as.data.frame(colData(ddsCol_dseq)[, c("colour", "texture")])
+
+# generate the heatmap
+
+
+pheatmap(assay(vsd)[select,], cluster_rows=FALSE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+
+``` r
+# instead of row means we can use row variances, so we plot the most variable genes among samples
+
+library(genefilter)
+
+topVarGenes <- head(order(rowVars(assay(vsd)),decreasing=TRUE ), 30 ) # picking the top 20 most variable genes
+
+pheatmap(assay(vsd)[topVarGenes,], cluster_rows=FALSE, show_rownames=T,
+         cluster_cols=FALSE, annotation_col=df)
+```
+
+![](L-Banda-DE-Analysis_files/figure-gfm/unnamed-chunk-30-2.png)<!-- -->
+
+It’s interesting to see that in this last heat map, we see the two genes
+that were the top,(with the lowest padj value) in terms of texture, up
+regulated for samples with hard texture, are the most variable here. The
+heatmap also provides a picture of other genes that we could look into.
+
+For example genes *g25533* and *g13361* seem to be opposites of each
+other
+
+-   To do
+-   select the up and down regulated genes for texture and colour to use
+    for plotting
+-   order the levels for color so they are together in the heatmap
+
+How do we select for the genes that were up/down regulated from the dseq
+results object to be represented in the heat map.
+
+Let’s see how to do that;
+
+``` r
+as.data.frame(res_up)
+
+res_up_ord <- as.data.frame(res_up[order(res_up$padj),])
+
+# we have ordered the results of the texture up regulated genes by padj values, hence we have g62112 at the top.
+
+#Okay we need to have a list of the top most regulated genes, then we can extract them from the dds object by row names
+
+top_50_tex <- rownames(res_up_ord)[1:100]
+
+counts(resCol_up)
+
+#we first try to subset using dplyr
+require(dplyr)
+
+dds_col_dseq_top_50 
+
+row.names(rownames(ddsCol_dseq)) %in% top_50_tex
+
+# maybe we can do it differently
+
+ddsCol_dseq@assays@data@listData$counts %>% as.data.frame() -> ddsCol_dseq_df
+
+ddsCol_dseq@assays@data@listData$counts %>% class()
+
+ddsCol_dseq_df %>% filter(row.names(ddsCol_dseq_df) %in% top_50_tex) -> new_ddsCol_counts
+
+
+
+nrow(new_ddsCol_counts)
+
+ddsCol_dseq@assays@data@listData$counts <- as.matrix(new_ddsCol_counts)
+```
+
 ## Session information
 
 Details of packages used for the work flow
@@ -854,13 +966,14 @@ sessionInfo()
     ## [8] methods   base     
     ## 
     ## other attached packages:
-    ##  [1] viridis_0.6.0               viridisLite_0.4.0          
-    ##  [3] scales_1.1.1                ggplot2_3.3.3              
-    ##  [5] DESeq2_1.30.1               SummarizedExperiment_1.20.0
-    ##  [7] Biobase_2.50.0              MatrixGenerics_1.2.1       
-    ##  [9] matrixStats_0.58.0          GenomicRanges_1.42.0       
-    ## [11] GenomeInfoDb_1.26.7         IRanges_2.24.1             
-    ## [13] S4Vectors_0.28.1            BiocGenerics_0.36.0        
+    ##  [1] genefilter_1.72.1           pheatmap_1.0.12            
+    ##  [3] viridis_0.6.0               viridisLite_0.4.0          
+    ##  [5] scales_1.1.1                ggplot2_3.3.3              
+    ##  [7] DESeq2_1.30.1               SummarizedExperiment_1.20.0
+    ##  [9] Biobase_2.50.0              MatrixGenerics_1.2.1       
+    ## [11] matrixStats_0.58.0          GenomicRanges_1.42.0       
+    ## [13] GenomeInfoDb_1.26.7         IRanges_2.24.1             
+    ## [15] S4Vectors_0.28.1            BiocGenerics_0.36.0        
     ## 
     ## loaded via a namespace (and not attached):
     ##  [1] httr_1.4.2             bit64_4.0.5            splines_4.0.3         
@@ -869,19 +982,19 @@ sessionInfo()
     ## [10] lattice_0.20-41        glue_1.4.2             digest_0.6.27         
     ## [13] RColorBrewer_1.1-2     XVector_0.30.0         colorspace_2.0-0      
     ## [16] htmltools_0.5.1        Matrix_1.3-2           XML_3.99-0.6          
-    ## [19] pkgconfig_2.0.3        genefilter_1.72.1      zlibbioc_1.36.0       
-    ## [22] purrr_0.3.4            xtable_1.8-4           BiocParallel_1.24.1   
-    ## [25] tibble_3.0.5           annotate_1.68.0        farver_2.0.3          
-    ## [28] generics_0.1.0         ellipsis_0.3.1         cachem_1.0.4          
-    ## [31] withr_2.4.1            survival_3.2-10        magrittr_2.0.1        
-    ## [34] crayon_1.4.1           memoise_2.0.0          evaluate_0.14         
-    ## [37] fansi_0.4.2            tools_4.0.3            lifecycle_1.0.0       
-    ## [40] stringr_1.4.0          munsell_0.5.0          locfit_1.5-9.4        
-    ## [43] DelayedArray_0.16.3    AnnotationDbi_1.52.0   compiler_4.0.3        
-    ## [46] rlang_0.4.10           grid_4.0.3             RCurl_1.98-1.3        
-    ## [49] bitops_1.0-6           labeling_0.4.2         rmarkdown_2.7         
-    ## [52] gtable_0.3.0           DBI_1.1.1              R6_2.5.0              
-    ## [55] gridExtra_2.3          knitr_1.30             dplyr_1.0.3           
-    ## [58] fastmap_1.1.0          bit_4.0.4              utf8_1.2.1            
-    ## [61] stringi_1.5.3          Rcpp_1.0.6             vctrs_0.3.6           
-    ## [64] geneplotter_1.68.0     tidyselect_1.1.0       xfun_0.20
+    ## [19] pkgconfig_2.0.3        zlibbioc_1.36.0        purrr_0.3.4           
+    ## [22] xtable_1.8-4           BiocParallel_1.24.1    tibble_3.0.5          
+    ## [25] annotate_1.68.0        farver_2.0.3           generics_0.1.0        
+    ## [28] ellipsis_0.3.1         cachem_1.0.4           withr_2.4.1           
+    ## [31] survival_3.2-10        magrittr_2.0.1         crayon_1.4.1          
+    ## [34] memoise_2.0.0          evaluate_0.14          fansi_0.4.2           
+    ## [37] tools_4.0.3            lifecycle_1.0.0        stringr_1.4.0         
+    ## [40] munsell_0.5.0          locfit_1.5-9.4         DelayedArray_0.16.3   
+    ## [43] AnnotationDbi_1.52.0   compiler_4.0.3         rlang_0.4.10          
+    ## [46] grid_4.0.3             RCurl_1.98-1.3         bitops_1.0-6          
+    ## [49] labeling_0.4.2         rmarkdown_2.7          gtable_0.3.0          
+    ## [52] DBI_1.1.1              R6_2.5.0               gridExtra_2.3         
+    ## [55] knitr_1.30             dplyr_1.0.3            fastmap_1.1.0         
+    ## [58] bit_4.0.4              utf8_1.2.1             stringi_1.5.3         
+    ## [61] Rcpp_1.0.6             vctrs_0.3.6            geneplotter_1.68.0    
+    ## [64] tidyselect_1.1.0       xfun_0.20
